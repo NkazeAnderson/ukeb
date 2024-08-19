@@ -6,6 +6,7 @@ import Button from "../ui/Button";
 import { colors } from "@/constants/constants";
 import { useRouter } from "expo-router";
 import { isWeb } from "@/constants/environment";
+import Avatar from "../ui/Avatar";
 
 const NavBar = () => {
   const { user, navOpen, setNavOpen } = useContext(AppContext) as appContextT;
@@ -54,13 +55,7 @@ const NavBar = () => {
           </View>
         ) : (
           <View className="">
-            <View className="w-[60px] h-[60px] ">
-              <Image
-                className="flex-1 aspect-square rounded-full"
-                resizeMode="contain"
-                source={require("@/assets/images/no-dp.png")}
-              />
-            </View>
+            <Avatar image={require("@/assets/images/no-dp.png")} />
           </View>
         )}
       </View>

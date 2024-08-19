@@ -8,6 +8,12 @@ export default function NotFoundScreen() {
       <Text className="font-bold text-24 md:text-32 text-white">
         Page not found
       </Text>
+      <Link
+        href={"/"}
+        className="font-bold text-16 md:text-24 text-white underline"
+      >
+        Go back Home
+      </Link>
     </View>
   );
 }

@@ -1,13 +1,15 @@
 import { View, Text, Image, TextInput, ScrollView } from "react-native";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import Button from "@/components/ui/Button";
 import InputComponent from "@/components/ui/InputComponent";
 import Entypo from "@expo/vector-icons/Entypo";
-import { colors } from "@/constants/constants";
-import { Link } from "expo-router";
+import { colors, user } from "@/constants/constants";
+import { Link, router } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import { AppContext } from "@/components/ContextProviders/AppContext";
 
 const Login = () => {
+  const { setUser } = useContext(AppContext) as appContextT;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState("");
@@ -84,6 +86,8 @@ const Login = () => {
                       setEmailError("Enter Email");
                     } else if (step === 1 && password) {
                       console.log("submit");
+                      setUser(user);
+                      router.push("/dashboard");
                     } else if (step === 1 && !password) {
                       setPasswordError("Provide Password");
                     }

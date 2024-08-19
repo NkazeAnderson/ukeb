@@ -32,7 +32,14 @@ const HeroSection = () => {
                 </Button>
               </View>
               <View className="lg:w-1/2 p-2">
-                <Button outlined color="white" textColor="white">
+                <Button
+                  outlined
+                  color="white"
+                  textColor="white"
+                  action={() => {
+                    router.push("/dashboard");
+                  }}
+                >
                   Find out more
                 </Button>
               </View>
