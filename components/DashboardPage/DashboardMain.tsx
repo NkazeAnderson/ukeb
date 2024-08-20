@@ -6,11 +6,14 @@ import { colors } from "@/constants/constants";
 import Entypo from "@expo/vector-icons/Entypo";
 import Feather from "@expo/vector-icons/Feather";
 import Button from "../ui/Button";
+import DashboardSideBar from "./DashboardSideBar";
+import { useRouter } from "expo-router";
 
 const DashboardMain = () => {
+  const router = useRouter();
   return (
-    <ScrollView className=" flex flex-1 bg-blue/20 p-2 md:px-3 lg:px-6 rounded-md ">
-      <View className="flex flex-row pb-12">
+    <ScrollView className="flex flex-1 bg-blue/20 p-2 md:px-3 lg:px-6 rounded-md ">
+      <View className="flex flex-col lg:flex-row pb-12">
         <View className="w-full lg:w-2/3 space-y-2">
           <Text className="text-secondary font-medium text-24 md:text-32">
             Important Updates
@@ -51,7 +54,7 @@ const DashboardMain = () => {
               Balance
             </Text>
             <Text className="text-white text-center font-bold text-32 md:text-48 ">
-              $ 0
+              £ 0
             </Text>
             <Text className="text-gray-text text-center font-bold text-14 md:text-16 ">
               Available
@@ -67,7 +70,7 @@ const DashboardMain = () => {
                   Incoming
                 </Text>
                 <Text className="font-regular text-14 text-white">
-                  $ 1000000000
+                  £ 1000000000
                 </Text>
               </View>
             </View>
@@ -77,7 +80,7 @@ const DashboardMain = () => {
                   Outgoing
                 </Text>
                 <Text className="font-regular text-14 text-white">
-                  $ 1000000000
+                  £ 1000000000
                 </Text>
               </View>
               <View className="bg-danger p-2 rounded-full ">
@@ -89,8 +92,14 @@ const DashboardMain = () => {
               </View>
             </View>
           </View>
-          <View className="px-[25%] md:px-0.5 lg:px-[25%]">
-            <Button color="primary" textColor="white">
+          <View className="px-[25%] ">
+            <Button
+              color="primary"
+              textColor="white"
+              action={() => {
+                router.push("/dashboard/send");
+              }}
+            >
               Send Money
             </Button>
           </View>
@@ -137,7 +146,9 @@ const DashboardMain = () => {
             </View>
           </View>
         </View>
-        <View className="lg:w-1/3"></View>
+        <View className="lg:w-1/3 p-4">
+          <DashboardSideBar />
+        </View>
       </View>
     </ScrollView>
   );

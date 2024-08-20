@@ -15,7 +15,7 @@ export default function Button({
   children: React.ReactNode;
   outlined?: boolean;
   action?: () => void;
-  color: "white" | "black" | "primary" | "secondary";
+  color: "white" | "black" | "primary" | "secondary" | "danger";
   textColor: "white" | "black" | "primary" | "secondary";
 }) {
   return (
@@ -47,6 +47,13 @@ export default function Button({
              ? "bg-primary"
              : color === "primary" && outlined
              ? " border-2 border-primary"
+             : ""
+         }  
+         ${
+           color === "danger" && !outlined
+             ? "bg-danger"
+             : color === "danger" && outlined
+             ? " border-2 border-danger"
              : ""
          }  
         

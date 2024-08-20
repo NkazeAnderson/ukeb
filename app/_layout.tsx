@@ -24,6 +24,7 @@ import { View } from "react-native";
 import AppContextProvider from "@/components/ContextProviders/AppContext";
 import NavBar from "@/components/navBar/NavBar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { colors } from "@/constants/constants";
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
@@ -47,7 +48,7 @@ export default function RootLayout() {
       <AppContextProvider>
         <GestureHandlerRootView className="flex flex-1 bg-background">
           
-    <Stack screenOptions={{headerShown:false}}>
+    <Stack screenOptions={{headerShown:false, contentStyle:{backgroundColor:colors.background}}}>
         <Stack.Screen name="+not-found" />
       </Stack>
    </GestureHandlerRootView>

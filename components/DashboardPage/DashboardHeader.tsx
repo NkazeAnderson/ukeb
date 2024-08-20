@@ -5,9 +5,11 @@ import { Entypo, FontAwesome } from "@expo/vector-icons";
 import Avatar from "../ui/Avatar";
 import { colors } from "@/constants/constants";
 import { AppContext } from "../ContextProviders/AppContext";
+import { useRouter } from "expo-router";
 
 const DashboardHeader = () => {
   const { setNavOpen } = useContext(AppContext) as appContextT;
+  const router = useRouter();
   return (
     <View className="flex flex-row items-center justify-between">
       <View>
@@ -23,7 +25,12 @@ const DashboardHeader = () => {
         Good Morning, Wale
       </Text>
       <View className="flex flex-row w-fit space-x-5 items-center">
-        <IconButton badge={10}>
+        <IconButton
+          badge={10}
+          action={() => {
+            router.push("/dashboard/notifications");
+          }}
+        >
           <FontAwesome name="bell-o" size={40} color={colors.white} />
         </IconButton>
         <Avatar image={require("@/assets/images/no-dp.png")} />

@@ -11,6 +11,7 @@ interface propsT extends TextInputProps {
   setValue?: React.Dispatch<React.SetStateAction<string>>;
   error?: string;
   setError?: React.Dispatch<React.SetStateAction<string>>;
+  whiteBg?: boolean;
 }
 const InputComponent = (props: propsT) => {
   const inputRef = useRef<TextInput | null>(null);
@@ -29,7 +30,9 @@ const InputComponent = (props: propsT) => {
 
       <TextInput
         ref={inputRef}
-        className=" border border-1 rounded-lg p-2"
+        className={` border border-1 rounded-lg p-2 ${
+          props.whiteBg && "bg-white"
+        }`}
         value={props.value ? props.value : ""}
         onChangeText={(text) => {
           props.setValue && props.setValue(text);

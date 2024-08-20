@@ -10,8 +10,10 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import Avatar from "../ui/Avatar";
 import Button from "../ui/Button";
 import SideMenuButton from "../ui/SideMenuButton";
+import { useRouter } from "expo-router";
 
 const DashboardNav = () => {
+  const router = useRouter();
   const { navOpen, setNavOpen } = useContext(AppContext) as appContextT;
   return (
     <View
@@ -49,33 +51,33 @@ const DashboardNav = () => {
         </View>
         <View className="flex  flex-col justify-between flex-grow ">
           <View className="space-y-2">
-            <SideMenuButton text="Dashboard">
+            <SideMenuButton text="Dashboard" route={"/dashboard"}>
               <MaterialIcons
                 name="dashboard"
                 size={14}
                 color={colors["gray-text"]}
               />
             </SideMenuButton>
-            <SideMenuButton text="Banking Cards">
+            <SideMenuButton text="Banking Cards" route={"/dashboard/cards"}>
               <FontAwesome
                 name="credit-card-alt"
                 size={14}
                 color={colors.white}
               />
             </SideMenuButton>
-            <SideMenuButton text="Loans">
+            <SideMenuButton text="Loans" route={"/dashboard/loans"}>
               <MaterialIcons
                 name="currency-pound"
                 size={14}
                 color={colors.white}
               />
             </SideMenuButton>
-            <SideMenuButton text="Settings">
+            <SideMenuButton text="Settings" route={"/dashboard/settings"}>
               <FontAwesome name="gear" size={14} color={colors.white} />
             </SideMenuButton>
           </View>
           <View className="">
-            <SideMenuButton text="Contact Agent">
+            <SideMenuButton text="Contact Agent" route={"/dashboard"}>
               <MaterialCommunityIcons
                 name="face-agent"
                 size={14}
@@ -84,7 +86,13 @@ const DashboardNav = () => {
             </SideMenuButton>
           </View>
           <View>
-            <Button color="secondary" textColor="white">
+            <Button
+              color="secondary"
+              textColor="white"
+              action={() => {
+                router.push("/");
+              }}
+            >
               Log Out
             </Button>
           </View>
