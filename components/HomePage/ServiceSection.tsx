@@ -33,7 +33,7 @@ const ServiceSection = () => {
         <Text className=" font-italics text-[14px] text-white ">
           *Fees are based on the type of business account you open with us. Any
           additional services you’d like to use may have their own fees. Account
-          fees are free for your first 12 months as a new Barclays business
+          fees are free for your first 12 months as a new UK Exchange business
           account holder and start from £8.50 per month after that.
         </Text>
       </View>

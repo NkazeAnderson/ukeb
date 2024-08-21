@@ -13,36 +13,42 @@ interface propsT extends TextInputProps {
   setError?: React.Dispatch<React.SetStateAction<string>>;
   whiteBg?: boolean;
 }
-const InputComponent = (props: propsT) => {
+const InputComponent = ({
+  label,
+  setValue,
+  error,
+  setError,
+  whiteBg,
+  value,
+  ...rest
+}: propsT) => {
   const inputRef = useRef<TextInput | null>(null);
+
   return (
     <KeyboardAvoidingView className="space-y-2 py-1">
-      {props.label && (
+      {label && (
         <Text
           onPress={() => {
             inputRef.current && inputRef.current.focus();
           }}
           className="font-medium text-16 text-primary"
         >
-          {props.label}
+          {label}
         </Text>
       )}
 
       <TextInput
         ref={inputRef}
-        className={` border border-1 rounded-lg p-2 ${
-          props.whiteBg && "bg-white"
-        }`}
-        value={props.value ? props.value : ""}
+        className={` border border-1 rounded-lg p-2 ${whiteBg && "bg-white"}`}
+        value={value ? value : ""}
         onChangeText={(text) => {
-          props.setValue && props.setValue(text);
-          props.error && props.setError && props.setError("");
+          setValue && setValue(text);
+          error && setError && setError("");
         }}
+        {...rest}
       />
-      {props.error && (
-        <Text className=" text-danger font-regular text-[14px]">
-          {props.error}
-        </Text>
+      {error && (
+        <Text className=" text-danger font-regular text-[14px]">{error}</Text>
       )}
     </KeyboardAvoidingView>
   );

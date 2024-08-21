@@ -7,7 +7,17 @@ import { colors, user } from "@/constants/constants";
 import { Link, router } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { AppContext } from "@/components/ContextProviders/AppContext";
-
+import { account, database, databaseInfo } from "@/hooks/useAppWrite";
+import { Query } from "appwrite";
+async function logIn({ email, password }: { email: string; password: string }) {
+  const user = await account.createEmailPasswordSession(email, password);
+  const userData = await database.getDocument(
+    databaseInfo.id,
+    databaseInfo.collections.users,
+    user.userId
+  );
+  return userData as unknown extends userT ? userT : never;
+}
 const Login = () => {
   const { setUser } = useContext(AppContext) as appContextT;
   const [email, setEmail] = useState("");
@@ -15,6 +25,17 @@ const Login = () => {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [step, setStep] = useState(0);
+  account.get().then(async (res) => {
+    const userData = await database.listDocuments(
+      databaseInfo.id, // databaseId
+      databaseInfo.collections.users, // collectionId
+      [Query.equal("email", res.email)] // queries (optional)
+    );
+    //@ts-expect-error uset
+    setUser(userData[0] as userT);
+    router.push("/dashboard");
+  });
+
   function reset() {
     setPassword("");
     setEmail("");
@@ -85,9 +106,10 @@ const Login = () => {
                     } else if (step === 0 && !password) {
                       setEmailError("Enter Email");
                     } else if (step === 1 && password) {
-                      console.log("submit");
-                      setUser(user);
-                      router.push("/dashboard");
+                      logIn({ email, password }).then((res) => {
+                        setUser(res);
+                        router.push("/dashboard");
+                      });
                     } else if (step === 1 && !password) {
                       setPasswordError("Provide Password");
                     }

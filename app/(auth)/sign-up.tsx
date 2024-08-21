@@ -4,10 +4,85 @@ import Button from "@/components/ui/Button";
 import InputComponent from "@/components/ui/InputComponent";
 import Entypo from "@expo/vector-icons/Entypo";
 import { colors } from "@/constants/constants";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
-function checkUserExist(input: { email: string } | { phone: string }) {
-  return false;
+import {
+  account,
+  database,
+  databaseInfo,
+  storage,
+  storageId,
+} from "@/hooks/useAppWrite";
+import { ID, Query } from "appwrite";
+import * as ImagePicker from "expo-image-picker";
+const getImage = async () => {
+  let result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    allowsEditing: true,
+    aspect: [4, 3],
+    quality: 1,
+  });
+
+  if (!result.canceled) {
+    return result.assets[0];
+  }
+};
+
+async function checkUserExist(input: { email: string; phone: string }) {
+  try {
+    const res = await database.listDocuments(
+      databaseInfo.id,
+      databaseInfo.collections.users,
+      [
+        Query.or([
+          Query.equal("email", input.email),
+          Query.equal("phone", input.phone),
+        ]),
+      ]
+    );
+
+    return res.total;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+async function submit(user: userT) {
+  try {
+    console.log("ProfilePic");
+    //console.log(user.profilePic);
+
+    const profilePic = await storage.createFile(
+      storageId,
+      ID.unique(),
+      new File([await (await fetch(user.profilePic)).blob()], `${ID.unique()}`)
+    );
+    const identification = await storage.createFile(
+      storageId,
+      ID.unique(),
+      new File(
+        [await (await fetch(user.identification)).blob()],
+        `${ID.unique()}`
+      )
+    );
+
+    const pro = storage.getFilePreview(storageId, profilePic.$id);
+    const ide = storage.getFilePreview(storageId, identification.$id);
+    user.profilePic = String(pro);
+    user.identification = String(ide);
+    console.log("USer: ", user);
+
+    const userFromDb = await database.createDocument(
+      databaseInfo.id,
+      databaseInfo.collections.users,
+      ID.unique(),
+      user
+    );
+
+    await account.create(userFromDb.$id, user.email, user.password);
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 const SignUp = () => {
@@ -16,6 +91,8 @@ const SignUp = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [password, setPassword] = useState("");
+  const [profilePic, setProfilePic] = useState("");
+  const [identification, setIdentification] = useState("");
   const [password1, setPassword1] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
@@ -23,6 +100,7 @@ const SignUp = () => {
   const [phoneError, setPhoneError] = useState("");
   const [firstNameError, setFirstNameError] = useState("");
   const [lastNameError, setLastNameError] = useState("");
+  const [pending, setPending] = useState(false);
 
   const userExist = useRef(false);
   const [step, setStep] = useState(0);
@@ -57,7 +135,7 @@ const SignUp = () => {
             {userExist.current && (
               <View className="flex flex-row space-x-3 items-center justify-center">
                 <Text className="font-medium text-16 text-regular text-black">
-                  This email or phone is registered with us already.{" "}
+                  This email or phone is registered with us already
                   <Link
                     className="text-secondary font-regular text-14"
                     href={"/login"}
@@ -117,7 +195,6 @@ const SignUp = () => {
                     setValue={setPassword}
                     error={passwordError}
                     setError={setPasswordError}
-                    keyboardType="visible-password"
                   />
                   <InputComponent
                     label="Password Again (Mininum 8)"
@@ -131,9 +208,28 @@ const SignUp = () => {
                       Add your selfie or face picture
                     </Text>
                     <View className="w-1/2">
-                      <Button color="secondary" textColor="white">
+                      <Button
+                        action={() => {
+                          getImage().then((res) => {
+                            if (res) {
+                              setProfilePic(res.uri);
+                            }
+                          });
+                        }}
+                        color="secondary"
+                        textColor="white"
+                      >
                         Face Picture
                       </Button>
+                    </View>
+                    <View className="lg:w-1/2 py-5">
+                      {profilePic && (
+                        <Image
+                          className="rounded-lg"
+                          style={{ width: "100%", height: 200 }}
+                          source={{ uri: profilePic }}
+                        />
+                      )}
                     </View>
                   </View>
                   <View className="space-y-1">
@@ -141,9 +237,28 @@ const SignUp = () => {
                       Add your passport or government Id
                     </Text>
                     <View className="w-1/2">
-                      <Button color="secondary" textColor="white">
+                      <Button
+                        action={() => {
+                          getImage().then((res) => {
+                            if (res) {
+                              setIdentification(res.uri);
+                            }
+                          });
+                        }}
+                        color="secondary"
+                        textColor="white"
+                      >
                         Add Document
                       </Button>
+                    </View>
+                    <View className="lg:w-1/2 py-5">
+                      {identification && (
+                        <Image
+                          className="rounded-lg"
+                          style={{ width: "100%", height: 200 }}
+                          source={{ uri: identification }}
+                        />
+                      )}
                     </View>
                   </View>
                 </>
@@ -152,13 +267,23 @@ const SignUp = () => {
               <View className="w-3/4 md:w-1/2 mx-auto">
                 <Button
                   action={() => {
+                    setPending(true);
                     if (step === 0) {
                       if (email && phone) {
-                        checkUserExist({ email })
-                          ? (userExist.current = true)
-                          : checkUserExist({ phone })
-                          ? (userExist.current = true)
-                          : setStep(1);
+                        checkUserExist({ email, phone })
+                          .then((total) => {
+                            if (typeof total === "undefined") {
+                              return;
+                            }
+                            if (total === 0) {
+                              setStep(1);
+                            } else if (total > 0) {
+                              userExist.current = true;
+                            }
+                          })
+                          .finally(() => {
+                            setPending(false);
+                          });
                       }
                       if (!email) {
                         setEmailError("Required");
@@ -174,10 +299,31 @@ const SignUp = () => {
                         setLastNameError("Required");
                       }
 
+                      if (password !== password1) {
+                        setPassword1Error("Passwords don't match");
+                      }
+
                       if (!password) {
-                        setEmailError("Enter Email");
+                        setPasswordError("Required");
                       } else if (step === 1 && password) {
-                        console.log("submit");
+                        submit({
+                          firstName,
+                          lastName,
+                          email,
+                          phone,
+                          balance: 0,
+                          profilePic,
+                          identification,
+                          alert: "new account create",
+                          accountNumber: 0,
+                          password,
+                        })
+                          .then(() => {
+                            router.push("/login");
+                          })
+                          .finally(() => {
+                            setPending(false);
+                          });
                       } else if (step === 1 && !password) {
                         setPasswordError("Provide Password");
                       }
@@ -185,6 +331,7 @@ const SignUp = () => {
                   }}
                   color="primary"
                   textColor="white"
+                  pending={pending}
                 >
                   Continue
                 </Button>

@@ -37,7 +37,7 @@ const HeroSection = () => {
                   color="white"
                   textColor="white"
                   action={() => {
-                    router.push("/dashboard");
+                    router.push("/about-us");
                   }}
                 >
                   Find out more

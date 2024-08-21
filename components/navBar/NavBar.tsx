@@ -1,22 +1,31 @@
-import { View, Text, Image, TouchableOpacity } from "react-native";
+import { View, Text, Image, TouchableOpacity, Pressable } from "react-native";
 import React, { useContext, useEffect } from "react";
 import Entypo from "@expo/vector-icons/Entypo";
 import { AppContext } from "../ContextProviders/AppContext";
 import Button from "../ui/Button";
 import { colors } from "@/constants/constants";
-import { useRouter } from "expo-router";
+import { Href, Link, usePathname, useRouter } from "expo-router";
 import { isWeb } from "@/constants/environment";
 import Avatar from "../ui/Avatar";
 
 const NavBar = () => {
   const { user, navOpen, setNavOpen } = useContext(AppContext) as appContextT;
+  const path = usePathname();
   const router = useRouter();
+  const links: { name: string; path: Href<string> }[] = [
+    { name: "Home", path: "/" },
+    { name: "Contact Us", path: "/contact-us" },
+    { name: "About Us", path: "/about-us" },
+  ];
   useEffect(() => {
     isWeb &&
       window.addEventListener("resize", () => {
         window.innerWidth > 1000 && setNavOpen(false);
       });
   }, []);
+  useEffect(() => {
+    setNavOpen(false);
+  }, [path]);
   return (
     <View className="lg:px-[50px] lg:py-[10px] px-2 py-2 border-b-2 border-gray">
       <View className="flex flex-row justify-between items-center  bg-background">
@@ -33,13 +42,18 @@ const NavBar = () => {
           />
         </TouchableOpacity>
         <View className="w-[60px] h-[60px]">
-          <View className="w-full h-full">
+          <Pressable
+            className="w-full h-full"
+            onPress={() => {
+              router.push("/");
+            }}
+          >
             <Image
-              className="flex-1 aspect-video"
+              style={{ width: 60, height: 60 }}
               resizeMode="contain"
               source={require("@/assets/images/ukeb-logo.png")}
             />
-          </View>
+          </Pressable>
         </View>
         {!user ? (
           <View>
@@ -64,21 +78,17 @@ const NavBar = () => {
           navOpen ? "flex" : "hidden"
         } justify-center lg:items-center`}
       >
-        <Text className=" font-medium text-white text-16 md:text-20 hover:text-primary hover:cursor-pointer underline underline-offset-2">
-          Home
-        </Text>
-        <Text className=" font-medium text-white text-16 md:text-20 hover:text-primary hover:cursor-pointer underline underline-offset-2">
-          Contact
-        </Text>
-        <Text className=" font-medium text-white text-16 md:text-20 hover:text-primary hover:cursor-pointer underline underline-offset-2">
-          Business
-        </Text>
-        <Text className=" font-medium text-white text-16 md:text-20 hover:text-primary hover:cursor-pointer underline underline-offset-2">
-          International Trade
-        </Text>
-        <Text className=" font-medium text-white text-16 md:text-20 hover:text-primary hover:cursor-pointer underline underline-offset-2">
-          Debit and Credit Cards
-        </Text>
+        {links.map((link, index) => (
+          <Link
+            key={index}
+            href={link.path}
+            className={` font-medium ${
+              path === link.path ? "text-primary" : "text-white"
+            }  text-16 md:text-20 hover:text-primary hover:cursor-pointer underline underline-offset-2`}
+          >
+            {link.name}
+          </Link>
+        ))}
       </View>
     </View>
   );

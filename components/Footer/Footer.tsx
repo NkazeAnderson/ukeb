@@ -1,5 +1,6 @@
 import { View, Text, Image } from "react-native";
 import React from "react";
+import { Link } from "expo-router";
 
 const Footer = () => {
   return (
@@ -16,7 +17,7 @@ const Footer = () => {
           2. When you open a business account using Online Banking, you’ll get
           free access to the FreshBooks package developed exclusively for our
           business customers. FreshBooks is offering this free for anyone who
-          has a business current account with us. Barclays Bank PLC only gets
+          has a business current account with us. UK Exchange Bank PLC only gets
           commission from upgrades.
         </Text>
         <Text className="font-regular text-16 text-white">
@@ -25,7 +26,7 @@ const Footer = () => {
           packages. You’ll only get the FreshBooks service free if you complete
           the sign-up journey with FreshBooks through our Online Banking
           referral and agree to the FreshBooks terms and conditions. The service
-          will be free for as long as you continue to be an eligible Barclays
+          will be free for as long as you continue to be an eligible UK Exchange
           business customer. If you close all your business current accounts,
           your free use of the FreshBooks service will end. If we end our
           partnership with FreshBooks, you won’t get the FreshBooks service free
@@ -39,7 +40,7 @@ const Footer = () => {
           can find more information about tax on gov.uk. You can choose to
           upgrade to a paid FreshBooks package at your own cost. If you decide
           to upgrade from the free FreshBooks service to another FreshBooks
-          plan, and pay the full price to FreshBooks, Barclays Bank PLC may
+          plan, and pay the full price to FreshBooks, UK Exchange Bank PLC may
           receive commission for this from FreshBooks. Referred products are
           owned and provided by FreshBooks. Alternative service providers in the
           market may offer similar products. If you sign up to FreshBooks,
@@ -54,24 +55,27 @@ const Footer = () => {
           Quick Links
         </Text>
         <View className="flex flex-row flex-wrap space-x-5 py-7">
-          <Text className="font-regular text-16 underline underline-offset-2 text-white">
+          <Link
+            href={"/"}
+            className="font-regular text-16 underline underline-offset-2 text-white"
+          >
             Home
-          </Text>
-          <Text className="font-regular text-16 underline underline-offset-2 text-white">
-            Home
-          </Text>
-          <Text className="font-regular text-16 underline underline-offset-2 text-white">
-            Home
-          </Text>
+          </Link>
+          <Link
+            href={"/dashboard"}
+            className="font-regular text-16 underline underline-offset-2 text-white"
+          >
+            My Account
+          </Link>
         </View>
         <View className="border-t border-gray-text">
           <Text className=" font-italics text-[14px] text-white">
-            Barclays Bank UK PLC and Barclays Bank PLC are each authorised by
-            the Prudential Regulation Authority and regulated by the Financial
-            Conduct Authority and the Prudential Regulation Authority. Barclays
-            Insurance Services Company Limited and Barclays Investment Solutions
-            Limited are each authorised and regulated by the Financial Conduct
-            Authority.
+            UK Exchange Bank UK PLC and UK Exchange Bank PLC are each authorised
+            by the Prudential Regulation Authority and regulated by the
+            Financial Conduct Authority and the Prudential Regulation Authority.
+            UK Exchange Insurance Services Company Limited and UK Exchange
+            Investment Solutions Limited are each authorised and regulated by
+            the Financial Conduct Authority.
           </Text>
         </View>
         <View className="flex flex-col md:flex-row items-center justify-center space-y-2 lg:space-x-2">
