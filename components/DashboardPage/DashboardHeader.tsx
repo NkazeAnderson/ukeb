@@ -8,8 +8,26 @@ import { AppContext } from "../ContextProviders/AppContext";
 import { useRouter } from "expo-router";
 
 const DashboardHeader = () => {
-  const { setNavOpen } = useContext(AppContext) as appContextT;
+  const { setNavOpen, user } = useContext(AppContext) as appContextT;
   const router = useRouter();
+
+  function getPeriodofDay() {
+    const date = new Date();
+    const hour = date.getHours();
+    if (hour >= 0 && hour < 12) {
+      return "morning";
+    } else if (hour >= 12 && hour < 16) {
+      return "afternoon";
+    } else if (hour >= 16 && hour < 20) {
+      return "evening";
+    } else {
+      return "night";
+    }
+  }
+
+  if (!user) {
+    return null;
+  }
   return (
     <View className="flex flex-row items-center justify-between">
       <View>
@@ -22,7 +40,7 @@ const DashboardHeader = () => {
         </IconButton>
       </View>
       <Text className="font-medium text-18 text-white max-w-[75%] capitalize">
-        Good Morning, Wale
+        {` Good ${getPeriodofDay()}, ${user.firstName}`}
       </Text>
       <View className="flex flex-row w-fit space-x-5 items-center">
         <IconButton
@@ -33,7 +51,7 @@ const DashboardHeader = () => {
         >
           <FontAwesome name="bell-o" size={40} color={colors.white} />
         </IconButton>
-        <Avatar image={require("@/assets/images/no-dp.png")} />
+        <Avatar image={{ uri: user?.profilePic }} />
       </View>
     </View>
   );

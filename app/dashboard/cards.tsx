@@ -1,12 +1,14 @@
 import { View, Text, Pressable } from "react-native";
-import React from "react";
+import React, { useContext } from "react";
 import CreditCard from "@/components/ui/CreditCard";
 import DashboardHeadings from "@/components/DashboardPage/DashboardHeadings";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { colors } from "@/constants/constants";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { AppContext } from "@/components/ContextProviders/AppContext";
 const cards = () => {
+  const { user } = useContext(AppContext) as appContextT;
   return (
     <View className="flex flex-1 bg-background">
       <DashboardHeadings centered>Banking Card</DashboardHeadings>
@@ -14,6 +16,11 @@ const cards = () => {
       <View className="flex flex-row items-center justify-center py-5">
         <CreditCard />
       </View>
+      {!user?.cardNumber && (
+        <Text className="text-danger font-italics text-16">
+          Add funds to your available balance to start using your banking card
+        </Text>
+      )}
       <View className="flex flex-row items-center justify-center">
         <View className="w-[340px]">
           <Pressable className="flex flex-row items-center p-2 space-x-4  bg-primary rounded-lg">

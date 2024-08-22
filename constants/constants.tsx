@@ -11,19 +11,19 @@ export const colors = {
   "gray-text": "#cbccd1",
   background: "#161b2f",
 };
-
-export const user: userT = {
-  firstName: "Wale",
-  lastName: "Wale",
-  email: "Wale@gmail.com",
-  phone: "671 172 1882",
-  balance: 0,
-  iban: "abc1223",
-  profilePic:
-    "https://us.images.westend61.de/0001336530pw/happy-male-and-female-business-people-talking-while-standing-in-office-MASF16839.jpg",
-  IdCard:
-    "https://us.images.westend61.de/0001336530pw/happy-male-and-female-business-people-talking-while-standing-in-office-MASF16839.jpg",
-};
+export const baseAccountNumber = "UKEB0182618271";
+// export const user: userT = {
+//   firstName: "Wale",
+//   lastName: "Wale",
+//   email: "Wale@gmail.com",
+//   phone: "671 172 1882",
+//   balance: 0,
+//   accountNumber: 0,
+//   profilePic:
+//     "https://us.images.westend61.de/0001336530pw/happy-male-and-female-business-people-talking-while-standing-in-office-MASF16839.jpg",
+//   identification:
+//     "https://us.images.westend61.de/0001336530pw/happy-male-and-female-business-people-talking-while-standing-in-office-MASF16839.jpg",
+// };
 
 export const supports: {
   icon: ImageSourcePropType;

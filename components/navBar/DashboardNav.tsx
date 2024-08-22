@@ -1,20 +1,29 @@
 import { View, Text, Image, Pressable } from "react-native";
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { AppContext } from "../ContextProviders/AppContext";
 import IconButton from "../ui/IconButton";
 import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { colors, user } from "@/constants/constants";
+import { colors } from "@/constants/constants";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import Avatar from "../ui/Avatar";
 import Button from "../ui/Button";
 import SideMenuButton from "../ui/SideMenuButton";
 import { useRouter } from "expo-router";
+import { account } from "@/hooks/useAppWrite";
+import Toast from "react-native-toast-message";
+import useToast from "@/hooks/useToast";
 
 const DashboardNav = () => {
+  const [pending, setPending] = useState(false);
   const router = useRouter();
-  const { navOpen, setNavOpen } = useContext(AppContext) as appContextT;
+  const { navOpen, setNavOpen, user, setUser } = useContext(
+    AppContext
+  ) as appContextT;
+  if (!user) {
+    return null;
+  }
   return (
     <View
       className={`w-4/5 absolute z-10 h-full bg-background  ${
@@ -44,7 +53,7 @@ const DashboardNav = () => {
           </Text>
           <View className="flex flex-row space-x-3 items-center">
             <Text className="font-regular text-16 text-white capitalize text-center py-3">
-              Wale Wale
+              {`${user.firstName} ${user.lastName}`}
             </Text>
             <MaterialIcons name="verified" size={16} color={colors.success} />
           </View>
@@ -89,8 +98,29 @@ const DashboardNav = () => {
             <Button
               color="secondary"
               textColor="white"
+              pending={pending}
               action={() => {
-                router.push("/");
+                setPending(true);
+                try {
+                  account.deleteSession("current").then(() => {
+                    router.replace("/login");
+                    setUser(undefined);
+                    setPending(false);
+                    useToast({
+                      type: "success",
+                      text1: "Logged Out",
+                      text2: "You are now logged out",
+                    });
+                  });
+                } catch (error) {
+                  router.replace("/login");
+                  setUser(undefined);
+                  useToast({
+                    type: "success",
+                    text1: "Logged Out",
+                    text2: "You are now logged out",
+                  });
+                }
               }}
             >
               Log Out

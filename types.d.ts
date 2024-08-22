@@ -1,4 +1,5 @@
 type userT = {
+  $id: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -20,16 +21,18 @@ type userT = {
   outgoingLimit?: number;
 };
 type transactionT = {
+  $id: string;
   sender: string;
   reciever: string;
   amount: number;
   status: "completed" | "pending" | "failed";
   purpose: string;
-  date: Date;
+  date: string;
 };
 type bankInfoT = {
   phone?: string;
   email: string;
+  swiftCode: string;
   whatsapp?: string;
   address?: string;
 };
@@ -44,4 +47,6 @@ type appContextT = {
   setUser: React.Dispatch<React.SetStateAction<userT | undefined>>;
   navOpen: boolean;
   setNavOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  bankInfo: bankInfoT;
+  setBankInfo: React.Dispatch<React.SetStateAction<bankInfoT>>;
 };

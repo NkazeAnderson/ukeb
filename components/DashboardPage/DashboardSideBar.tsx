@@ -1,19 +1,27 @@
 import { View, Text, Image } from "react-native";
-import React from "react";
+import React, { useContext } from "react";
 import { PieChart } from "react-native-gifted-charts";
 import DashboardHeadings from "./DashboardHeadings";
 import { colors } from "@/constants/constants";
+import { AppContext } from "../ContextProviders/AppContext";
 
 const DashboardSideBar = () => {
+  const { user } = useContext(AppContext) as appContextT;
   const incomingLimit = [
-    { value: 1, color: colors.primary },
+    { value: user?.incomingLimit ?? 1, color: colors.primary },
 
-    { value: 99, color: colors["gray-text"] },
+    {
+      value: user?.incomingLimit ? 100 - user?.incomingLimit : 99,
+      color: colors["gray-text"],
+    },
   ];
   const outGoingLimit = [
-    { value: 1, color: colors.primary },
+    { value: user?.outgoingLimit ?? 1, color: colors.primary },
 
-    { value: 99, color: colors["gray-text"] },
+    {
+      value: user?.outgoingLimit ? 100 - user?.outgoingLimit : 99,
+      color: colors["gray-text"],
+    },
   ];
   return (
     <View>

@@ -1,16 +1,45 @@
-import { View, Text } from "react-native";
-import React from "react";
+import { View, Text, Pressable } from "react-native";
+import React, { useContext, useEffect, useState } from "react";
 import { ScrollView } from "react-native-gesture-handler";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { colors } from "@/constants/constants";
+import { baseAccountNumber, colors } from "@/constants/constants";
 import Entypo from "@expo/vector-icons/Entypo";
 import Feather from "@expo/vector-icons/Feather";
 import Button from "../ui/Button";
 import DashboardSideBar from "./DashboardSideBar";
-import { useRouter } from "expo-router";
+import { usePathname, useRouter } from "expo-router";
+import { AppContext } from "../ContextProviders/AppContext";
+import * as Clipboard from "expo-clipboard";
+import useToast from "@/hooks/useToast";
+import { database, databaseInfo } from "@/hooks/useAppWrite";
+import { Query } from "appwrite";
 
 const DashboardMain = () => {
+  const { user, bankInfo } = useContext(AppContext) as appContextT;
+  const [transactions, setTransactions] = useState<transactionT[]>([]);
   const router = useRouter();
+  const path = usePathname();
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+    path === "/dashboard" &&
+      database
+        .listDocuments(databaseInfo.id, databaseInfo.collections.transactions, [
+          Query.or([
+            Query.equal("sender", user.$id),
+            Query.equal("reciever", user.$id),
+          ]),
+          Query.orderDesc("date"),
+        ])
+        .then((res) => {
+          setTransactions([...(res.documents as [])]);
+        });
+  }, [path]);
+  const [viewMore, setViewMore] = useState(false);
+  if (!user) {
+    return null;
+  }
   return (
     <ScrollView className="flex flex-1 bg-blue/20 p-2 md:px-3 lg:px-6 rounded-md ">
       <View className="flex flex-col lg:flex-row pb-12">
@@ -24,7 +53,7 @@ const DashboardMain = () => {
               <AntDesign name="infocirlceo" size={24} color={colors.white} />
             </View>
             <Text className="font-regular text-16 text-white">
-              New account created
+              {user.alert}
             </Text>
           </View>
           <Text className="text-secondary text-center font-medium text-24 md:text-32">
@@ -38,23 +67,86 @@ const DashboardMain = () => {
               </Text>
             </View>
             <View className="p-1">
-              <Text className="font-regular text-center text-16 text-white">
-                1234567890
-              </Text>
+              {viewMore ? (
+                <View className="space-y-3">
+                  <View className="flex flex-row items-center space-x-2">
+                    <Text className=" font-medium text-18 text-white">No:</Text>
+                    <Text className=" font-medium text-16 text-gray-text">
+                      {baseAccountNumber + user.accountNumber}
+                    </Text>
+                  </View>
+                  <View className="flex flex-row items-center space-x-2">
+                    <Text className=" font-medium text-18 text-white">
+                      Swift Code:
+                    </Text>
+                    <Text className=" font-medium text-16 text-gray-text">
+                      {bankInfo.swiftCode}
+                    </Text>
+                  </View>
+                  <View className="flex flex-row items-center space-x-2">
+                    <Text className=" font-medium text-18 text-white">
+                      City:
+                    </Text>
+                    <Text className=" font-medium text-16 text-gray-text">
+                      London
+                    </Text>
+                  </View>
+                  <View className="flex flex-row items-center space-x-2">
+                    <Text className=" font-medium text-18 text-white">
+                      Country:
+                    </Text>
+                    <Text className=" font-medium text-16 text-gray-text">
+                      United Kingdom
+                    </Text>
+                  </View>
+                </View>
+              ) : (
+                <Text className="font-regular text-center text-16 text-white">
+                  {baseAccountNumber + user.accountNumber}
+                </Text>
+              )}
             </View>
-            <View className="bg-secondary flex flex-row items-center justify-between px-5">
+            <Pressable
+              className="bg-secondary py-2 border border-gray-text flex flex-row items-center justify-between px-5"
+              onPress={() => {
+                setViewMore((prev) => !prev);
+              }}
+            >
+              <Text className="font-medium text-center text-16 text-white">
+                {viewMore ? "Show Less" : "View More"}
+              </Text>
+              <Entypo name="chevron-down" size={16} color={colors.white} />
+            </Pressable>
+            <Pressable
+              className="bg-secondary flex flex-row items-center justify-between px-5 py-2"
+              onPress={async () => {
+                await Clipboard.setStringAsync(
+                  `Account Number: ${
+                    baseAccountNumber + user.accountNumber
+                  }, SwiftCode: ${
+                    bankInfo.swiftCode
+                  }, City: London, Country: United Kingdom`
+                ).then(() => {
+                  useToast({
+                    text1: "Copied",
+                    text2: "Successfully copied details",
+                    type: "success",
+                  });
+                });
+              }}
+            >
               <Text className="font-medium text-center text-16 text-white">
                 Share
               </Text>
               <Entypo name="share" size={16} color={colors.white} />
-            </View>
+            </Pressable>
           </View>
           <View>
             <Text className="text-gray-text text-center font-medium text-24 md:text-32">
               Balance
             </Text>
             <Text className="text-white text-center font-bold text-32 md:text-48 ">
-              £ 0
+              £ {user.balance}
             </Text>
             <Text className="text-gray-text text-center font-bold text-14 md:text-16 ">
               Available
@@ -70,7 +162,7 @@ const DashboardMain = () => {
                   Incoming
                 </Text>
                 <Text className="font-regular text-14 text-white">
-                  £ 1000000000
+                  £ {user.incomingBalance ?? 0}
                 </Text>
               </View>
             </View>
@@ -80,7 +172,7 @@ const DashboardMain = () => {
                   Outgoing
                 </Text>
                 <Text className="font-regular text-14 text-white">
-                  £ 1000000000
+                  £ {user.outgoingBalance ?? 0}
                 </Text>
               </View>
               <View className="bg-danger p-2 rounded-full ">
@@ -106,45 +198,94 @@ const DashboardMain = () => {
           <Text className="text-secondary font-medium text-24 md:text-32">
             Transactions
           </Text>
-          <View className="flex space-x-3 bg-info/20 rounded flex-row items-start border-2 border-info">
-            <View className="bg-info p-2 h-full ">
-              <AntDesign name="infocirlceo" size={24} color={colors.white} />
-            </View>
-            <View className="flex-grow">
-              <Text className="font-medium text-18 text-white">
-                No Transaction
-              </Text>
-              <Text className="font-regular text-16 text-white">
-                No Transaction recorded for this account
-              </Text>
-              <View className="flex flex-row justify-end items-center ">
-                <Text className="text-end text-gray-text">12/07/2024</Text>
+          {transactions.length === 0 && (
+            <View className="flex space-x-3 bg-info/20 rounded flex-row items-start border-2 border-info">
+              <View className="bg-info p-2 h-full ">
+                <AntDesign name="infocirlceo" size={24} color={colors.white} />
+              </View>
+              <View className="flex-grow">
+                <Text className="font-medium text-18 text-white">
+                  No Transaction
+                </Text>
+                <Text className="font-regular text-16 text-white">
+                  No Transaction recorded for this account
+                </Text>
+                <View className="flex flex-row justify-end items-center ">
+                  <Text className="text-end text-gray-text">12/07/2024</Text>
+                </View>
               </View>
             </View>
-          </View>
-          <View className="flex space-x-3 bg-info/20 rounded flex-row items-start border-2 border-info">
-            <View className="bg-info p-2 h-full ">
-              <AntDesign name="infocirlceo" size={24} color={colors.white} />
-            </View>
-            <View className="flex-grow px-1">
-              <Text className="font-medium text-18 text-white">
-                Incoming Funds
-              </Text>
-              <Text className="font-regular text-ellipsis text-16 text-white">
-                Pending transaction
-              </Text>
-              <Text className="font-regular text-ellipsis text-16 text-white">
-                $10000000
-              </Text>
+          )}
+          {transactions.length > 0 &&
+            transactions.map((transaction, index) => (
+              <View
+                key={index}
+                className={`flex space-x-3  rounded flex-row items-start border-2 border-info ${
+                  transaction.status === "failed"
+                    ? "border-danger bg-danger/20"
+                    : transaction.status === "pending"
+                    ? "border-info bg-info/20"
+                    : "border-success bg-success/20"
+                }`}
+              >
+                <View
+                  className={`${
+                    transaction.status === "failed"
+                      ? "bg-danger"
+                      : transaction.status === "pending"
+                      ? "bg-info"
+                      : "bg-success"
+                  } p-2 h-full `}
+                >
+                  <AntDesign
+                    name={
+                      transaction.status === "failed"
+                        ? "closecircleo"
+                        : transaction.status === "completed"
+                        ? "checkcircle"
+                        : "infocirlceo"
+                    }
+                    size={24}
+                    color={colors.white}
+                  />
+                </View>
+                <View className="flex-grow px-1">
+                  <Text className="font-medium text-18 text-white">
+                    {transaction.sender === user.$id &&
+                    transaction.status === "completed"
+                      ? "Sent Money"
+                      : transaction.sender === user.$id &&
+                        transaction.status === "pending"
+                      ? "Transfer in Progress"
+                      : transaction.sender === user.$id &&
+                        transaction.status === "failed"
+                      ? "Transfer Unsuccesfull"
+                      : transaction.reciever === user.$id &&
+                        transaction.status === "completed"
+                      ? "Received Money"
+                      : transaction.reciever === user.$id &&
+                        transaction.status === "pending"
+                      ? "Incoming Funds"
+                      : "Transfer Reverted"}
+                  </Text>
+                  <Text className="font-regular text-ellipsis text-16 text-white">
+                    {`${transaction.status} transaction`}
+                  </Text>
+                  <Text className="font-regular text-ellipsis text-16 text-white">
+                    {`£ ${transaction.amount}`}
+                  </Text>
 
-              <Text className="font-regular text-16 text-white">
-                Reason of Payment: Purchase of Artifacts
-              </Text>
-              <View className="flex flex-row justify-end items-center ">
-                <Text className="text-end text-gray-text">12/07/2024</Text>
+                  <Text className="font-regular text-16 text-white">
+                    Purpose: {transaction.purpose}
+                  </Text>
+                  <View className="flex flex-row justify-end items-center ">
+                    <Text className="text-end text-gray-text">{`${
+                      transaction.date.split("T")[0]
+                    }`}</Text>
+                  </View>
+                </View>
               </View>
-            </View>
-          </View>
+            ))}
         </View>
         <View className="lg:w-1/3 p-4">
           <DashboardSideBar />

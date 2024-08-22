@@ -6,10 +6,9 @@ import Button from "../ui/Button";
 import { colors } from "@/constants/constants";
 import { Href, Link, usePathname, useRouter } from "expo-router";
 import { isWeb } from "@/constants/environment";
-import Avatar from "../ui/Avatar";
 
 const NavBar = () => {
-  const { user, navOpen, setNavOpen } = useContext(AppContext) as appContextT;
+  const { navOpen, setNavOpen } = useContext(AppContext) as appContextT;
   const path = usePathname();
   const router = useRouter();
   const links: { name: string; path: Href<string> }[] = [
@@ -55,23 +54,18 @@ const NavBar = () => {
             />
           </Pressable>
         </View>
-        {!user ? (
-          <View>
-            <Button
-              color="primary"
-              textColor="white"
-              action={() => {
-                router.push("/login");
-              }}
-            >
-              Login
-            </Button>
-          </View>
-        ) : (
-          <View className="">
-            <Avatar image={require("@/assets/images/no-dp.png")} />
-          </View>
-        )}
+
+        <View>
+          <Button
+            color="primary"
+            textColor="white"
+            action={() => {
+              router.push("/login");
+            }}
+          >
+            Login
+          </Button>
+        </View>
       </View>
       <View
         className={`py-4 space-y-3 lg:space-y-0 lg:space-x-4 lg:flex lg:flex-row ${

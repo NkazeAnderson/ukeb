@@ -20,3 +20,4 @@ export const databaseInfo = {
 };
 
 export const storageId = "66c6232e002eb7f9554c";
+export const bankDocId = "66c6c1e800382827d01d";

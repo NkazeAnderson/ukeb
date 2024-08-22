@@ -15,6 +15,8 @@ import {
 } from "@/hooks/useAppWrite";
 import { ID, Query } from "appwrite";
 import * as ImagePicker from "expo-image-picker";
+import Toast from "react-native-toast-message";
+import useToast from "@/hooks/useToast";
 const getImage = async () => {
   let result = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -47,42 +49,39 @@ async function checkUserExist(input: { email: string; phone: string }) {
   }
 }
 
-async function submit(user: userT) {
-  try {
-    console.log("ProfilePic");
-    //console.log(user.profilePic);
+async function submit(user: Omit<userT, "$id">) {
+  console.log(
+    new File([await (await fetch(user.profilePic)).blob()], `${ID.unique()}`)
+  );
 
-    const profilePic = await storage.createFile(
-      storageId,
-      ID.unique(),
-      new File([await (await fetch(user.profilePic)).blob()], `${ID.unique()}`)
-    );
-    const identification = await storage.createFile(
-      storageId,
-      ID.unique(),
-      new File(
-        [await (await fetch(user.identification)).blob()],
-        `${ID.unique()}`
-      )
-    );
+  const profilePic = await storage.createFile(
+    storageId,
+    ID.unique(),
+    new File([await (await fetch(user.profilePic)).blob()], `${ID.unique()}`)
+  );
 
-    const pro = storage.getFilePreview(storageId, profilePic.$id);
-    const ide = storage.getFilePreview(storageId, identification.$id);
-    user.profilePic = String(pro);
-    user.identification = String(ide);
-    console.log("USer: ", user);
+  const identification = await storage.createFile(
+    storageId,
+    ID.unique(),
+    new File(
+      [await (await fetch(user.identification)).blob()],
+      `${ID.unique()}`
+    )
+  );
 
-    const userFromDb = await database.createDocument(
-      databaseInfo.id,
-      databaseInfo.collections.users,
-      ID.unique(),
-      user
-    );
+  const pro = storage.getFilePreview(storageId, profilePic.$id);
+  const ide = storage.getFilePreview(storageId, identification.$id);
+  user.profilePic = String(pro);
+  user.identification = String(ide);
 
-    await account.create(userFromDb.$id, user.email, user.password);
-  } catch (error) {
-    console.log(error);
-  }
+  const userFromDb = await database.createDocument(
+    databaseInfo.id,
+    databaseInfo.collections.users,
+    ID.unique(),
+    user
+  );
+
+  await account.create(userFromDb.$id, user.email, user.password);
 }
 
 const SignUp = () => {
@@ -309,17 +308,32 @@ const SignUp = () => {
                         submit({
                           firstName,
                           lastName,
-                          email,
+                          email: email.toLowerCase(),
                           phone,
                           balance: 0,
                           profilePic,
                           identification,
                           alert: "new account create",
                           accountNumber: 0,
-                          password,
+                          password: password.toLowerCase(),
                         })
                           .then(() => {
                             router.push("/login");
+                            useToast({
+                              type: "success",
+                              text1: "Success",
+                              text2:
+                                "Successfully created a new account. Please login",
+                            });
+                          })
+                          .catch((e) => {
+                            console.log(e);
+
+                            useToast({
+                              text1: "Sign Up Failed",
+                              text2: "Error signing you up, please retry",
+                              type: "error",
+                            });
                           })
                           .finally(() => {
                             setPending(false);

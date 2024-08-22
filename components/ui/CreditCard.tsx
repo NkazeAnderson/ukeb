@@ -1,7 +1,8 @@
 import { View, Text, StyleSheet, Image } from "react-native";
-import React from "react";
+import React, { useContext } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import { colors } from "@/constants/constants";
+import { AppContext } from "../ContextProviders/AppContext";
 
 const styles = StyleSheet.create({
   background: {
@@ -13,6 +14,7 @@ const styles = StyleSheet.create({
   },
 });
 const CreditCard = () => {
+  const { user } = useContext(AppContext) as appContextT;
   return (
     <View className="w-[340px] h-[230px] p-4 bg-primary rounded-2xl overflow-hidden">
       <LinearGradient
@@ -39,14 +41,18 @@ const CreditCard = () => {
         </View>
         <View className="flex flex-row justify-between items-end">
           <View>
-            <Text className="font-medium text-white text-14">Wale Wale</Text>
+            <Text className="font-medium text-white text-14">{`${user?.firstName} ${user?.lastName}`}</Text>
             <Text className="font-regular text-white text-14">
-              4019 1662 1662 7255
+              {user?.cardNumber ?? "XXXX XXXX XXXX XXXX"}
             </Text>
-            <Text className="font-regular text-white text-14">11/26</Text>
+            <Text className="font-regular text-white text-14">
+              {user?.cardExpMonthYear ?? "XX/XX"}
+            </Text>
           </View>
           <View>
-            <Text className="font-regular text-white text-14">253</Text>
+            <Text className="font-regular text-white text-14">
+              {user?.cardCVV ?? "XXX"}
+            </Text>
           </View>
         </View>
       </View>

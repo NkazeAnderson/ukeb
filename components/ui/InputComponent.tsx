@@ -25,7 +25,7 @@ const InputComponent = ({
   const inputRef = useRef<TextInput | null>(null);
 
   return (
-    <KeyboardAvoidingView className="space-y-2 py-1">
+    <View className="space-y-2 py-1">
       {label && (
         <Text
           onPress={() => {
@@ -36,21 +36,22 @@ const InputComponent = ({
           {label}
         </Text>
       )}
-
-      <TextInput
-        ref={inputRef}
-        className={` border border-1 rounded-lg p-2 ${whiteBg && "bg-white"}`}
-        value={value ? value : ""}
-        onChangeText={(text) => {
-          setValue && setValue(text);
-          error && setError && setError("");
-        }}
-        {...rest}
-      />
+      <KeyboardAvoidingView>
+        <TextInput
+          ref={inputRef}
+          className={` border border-1 rounded-lg p-2 ${whiteBg && "bg-white"}`}
+          value={value ? value : ""}
+          onChangeText={(text) => {
+            setValue && setValue(text);
+            error && setError && setError("");
+          }}
+          {...rest}
+        />
+      </KeyboardAvoidingView>
       {error && (
         <Text className=" text-danger font-regular text-[14px]">{error}</Text>
       )}
-    </KeyboardAvoidingView>
+    </View>
   );
 };
 
