@@ -74,6 +74,14 @@ async function submit(user: Omit<userT, "$id">) {
   user.profilePic = String(pro);
   user.identification = String(ide);
 
+  const allUsers = await database.listDocuments(
+    databaseInfo.id,
+    databaseInfo.collections.users
+  );
+
+  user.accountNumber = allUsers.total + 1;
+  console.log(user);
+
   const userFromDb = await database.createDocument(
     databaseInfo.id,
     databaseInfo.collections.users,
