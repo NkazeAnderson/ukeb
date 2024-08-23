@@ -17,8 +17,8 @@ const Footer = () => {
           2. When you open a business account using Online Banking, you’ll get
           free access to the FreshBooks package developed exclusively for our
           business customers. FreshBooks is offering this free for anyone who
-          has a business current account with us. UK Exchange Bank PLC only gets
-          commission from upgrades.
+          has a business current account with us. UK Metropolitan Bank PLC only
+          gets commission from upgrades.
         </Text>
         <Text className="font-regular text-16 text-white">
           The package is based on the existing FreshBooks £22 a month package,
@@ -26,11 +26,11 @@ const Footer = () => {
           packages. You’ll only get the FreshBooks service free if you complete
           the sign-up journey with FreshBooks through our Online Banking
           referral and agree to the FreshBooks terms and conditions. The service
-          will be free for as long as you continue to be an eligible UK Exchange
-          business customer. If you close all your business current accounts,
-          your free use of the FreshBooks service will end. If we end our
-          partnership with FreshBooks, you won’t get the FreshBooks service free
-          anymore. We’ll let you know if that happens. You’ll then need to
+          will be free for as long as you continue to be an eligible UK
+          Metropolitan business customer. If you close all your business current
+          accounts, your free use of the FreshBooks service will end. If we end
+          our partnership with FreshBooks, you won’t get the FreshBooks service
+          free anymore. We’ll let you know if that happens. You’ll then need to
           download all your data and reports to make sure you keep your records
           safe and secure, so that you comply with Making Tax Digital
           requirements. Find out more at
@@ -40,8 +40,8 @@ const Footer = () => {
           can find more information about tax on gov.uk. You can choose to
           upgrade to a paid FreshBooks package at your own cost. If you decide
           to upgrade from the free FreshBooks service to another FreshBooks
-          plan, and pay the full price to FreshBooks, UK Exchange Bank PLC may
-          receive commission for this from FreshBooks. Referred products are
+          plan, and pay the full price to FreshBooks, UK Metropolitan Bank PLC
+          may receive commission for this from FreshBooks. Referred products are
           owned and provided by FreshBooks. Alternative service providers in the
           market may offer similar products. If you sign up to FreshBooks,
           you’ll need to read and accept their terms and conditions, if you
@@ -70,12 +70,12 @@ const Footer = () => {
         </View>
         <View className="border-t border-gray-text">
           <Text className=" font-italics text-[14px] text-white">
-            UK Exchange Bank UK PLC and UK Exchange Bank PLC are each authorised
-            by the Prudential Regulation Authority and regulated by the
-            Financial Conduct Authority and the Prudential Regulation Authority.
-            UK Exchange Insurance Services Company Limited and UK Exchange
-            Investment Solutions Limited are each authorised and regulated by
-            the Financial Conduct Authority.
+            UK Metropolitan Bank UK PLC and UK Metropolitan Bank PLC are each
+            authorised by the Prudential Regulation Authority and regulated by
+            the Financial Conduct Authority and the Prudential Regulation
+            Authority. UK Metropolitan Insurance Services Company Limited and UK
+            Metropolitan Investment Solutions Limited are each authorised and
+            regulated by the Financial Conduct Authority.
           </Text>
         </View>
         <View className="flex flex-col md:flex-row items-center justify-center space-y-2 lg:space-x-2">

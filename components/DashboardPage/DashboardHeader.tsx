@@ -44,7 +44,7 @@ const DashboardHeader = () => {
       </Text>
       <View className="flex flex-row w-fit space-x-5 items-center">
         <IconButton
-          badge={10}
+          badge={1}
           action={() => {
             router.push("/dashboard/notifications");
           }}

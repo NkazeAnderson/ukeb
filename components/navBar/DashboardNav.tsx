@@ -18,7 +18,7 @@ import useToast from "@/hooks/useToast";
 const DashboardNav = () => {
   const [pending, setPending] = useState(false);
   const router = useRouter();
-  const { navOpen, setNavOpen, user, setUser } = useContext(
+  const { navOpen, setNavOpen, user, setUser, bankInfo } = useContext(
     AppContext
   ) as appContextT;
   if (!user) {
@@ -49,7 +49,7 @@ const DashboardNav = () => {
             Business Account
           </Text>
           <Text className="font-regular text-white text-20  capitalize text-center">
-            UK Exchange Bank
+            UK Metropolitan Bank
           </Text>
           <View className="flex flex-row space-x-3 items-center">
             <Text className="font-regular text-16 text-white capitalize text-center py-3">
@@ -86,7 +86,10 @@ const DashboardNav = () => {
             </SideMenuButton>
           </View>
           <View className="">
-            <SideMenuButton text="Contact Agent" route={"/dashboard"}>
+            <SideMenuButton
+              text="Contact Agent"
+              route={`https://wa.me/+${bankInfo.whatsapp}`}
+            >
               <MaterialCommunityIcons
                 name="face-agent"
                 size={14}
@@ -113,13 +116,8 @@ const DashboardNav = () => {
                     });
                   });
                 } catch (error) {
-                  router.replace("/login");
-                  setUser(undefined);
-                  useToast({
-                    type: "success",
-                    text1: "Logged Out",
-                    text2: "You are now logged out",
-                  });
+                  router.replace("/dashboard");
+                  console.log(error);
                 }
               }}
             >

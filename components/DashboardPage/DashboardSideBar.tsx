@@ -1,12 +1,18 @@
 import { View, Text, Image } from "react-native";
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { PieChart } from "react-native-gifted-charts";
 import DashboardHeadings from "./DashboardHeadings";
 import { colors } from "@/constants/constants";
 import { AppContext } from "../ContextProviders/AppContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const DashboardSideBar = () => {
   const { user } = useContext(AppContext) as appContextT;
+  const [gbpusd, setgbpusd] = useState(0);
+  const [gbpeur, setgbpeur] = useState(0);
+  const [gbpcad, setgbpcad] = useState(0);
+  const [gbpusdt, setgbpusdt] = useState(0);
+  const [gbpbtc, setgbpbtc] = useState(0);
   const incomingLimit = [
     { value: user?.incomingLimit ?? 1, color: colors.primary },
 
@@ -23,6 +29,24 @@ const DashboardSideBar = () => {
       color: colors["gray-text"],
     },
   ];
+  useEffect(() => {
+    AsyncStorage.getItem("gbpusd").then((r) => {
+      r && setgbpusd(JSON.parse(r).rate);
+    });
+    AsyncStorage.getItem("gbpusdt").then((r) => {
+      r && setgbpusdt(JSON.parse(r).rate);
+    });
+    AsyncStorage.getItem("gbpeur").then((r) => {
+      r && setgbpeur(JSON.parse(r).rate);
+    });
+    AsyncStorage.getItem("gbpcad").then((r) => {
+      r && setgbpcad(JSON.parse(r).rate);
+    });
+    AsyncStorage.getItem("gbpbtc").then((r) => {
+      r && setgbpbtc(JSON.parse(r).rate);
+    });
+  }, []);
+
   return (
     <View>
       <DashboardHeadings>Account Limits</DashboardHeadings>
@@ -72,7 +96,7 @@ const DashboardSideBar = () => {
             <Text className="text-white font-semibold text-14">GBP/USD</Text>
           </View>
           <View className="bg-gray-text flex-grow p-1">
-            <Text className="text-black font-regular text-14">2.001</Text>
+            <Text className="text-black font-regular text-14">{gbpusd}</Text>
           </View>
         </View>
         <View className="flex flex-row border-black border-1">
@@ -80,7 +104,7 @@ const DashboardSideBar = () => {
             <Text className="text-white font-semibold text-14">GBP/EUR</Text>
           </View>
           <View className="bg-gray-text flex-grow p-1">
-            <Text className="text-black font-regular text-14">1.991</Text>
+            <Text className="text-black font-regular text-14">{gbpeur}</Text>
           </View>
         </View>
         <View className="flex flex-row border-black border-1">
@@ -88,7 +112,7 @@ const DashboardSideBar = () => {
             <Text className="text-white font-semibold text-14">GBP/CAD</Text>
           </View>
           <View className="bg-gray-text flex-grow p-1">
-            <Text className="text-black font-regular text-14">2.990</Text>
+            <Text className="text-black font-regular text-14">{gbpcad}</Text>
           </View>
         </View>
       </View>
@@ -99,7 +123,7 @@ const DashboardSideBar = () => {
             <Text className="text-white font-semibold text-14">GBP/BTC</Text>
           </View>
           <View className="bg-gray-text flex-grow p-1">
-            <Text className="text-black font-regular text-14">2.001</Text>
+            <Text className="text-black font-regular text-14">{gbpbtc}</Text>
           </View>
         </View>
         <View className="flex flex-row border-black border-1">
@@ -107,14 +131,14 @@ const DashboardSideBar = () => {
             <Text className="text-white font-semibold text-14">GBP/USDT</Text>
           </View>
           <View className="bg-gray-text flex-grow p-1">
-            <Text className="text-black font-regular text-14">1.991</Text>
+            <Text className="text-black font-regular text-14">{gbpusdt}</Text>
           </View>
         </View>
       </View>
       <View className="mt-4 space-y-2">
         <DashboardHeadings>Stock Markets </DashboardHeadings>
         <Text className="font-regular text-white text-16">
-          Invest in leading profitable stock markets via UK Exchange Bank
+          Invest in leading profitable stock markets via UK Metropolitan Bank
         </Text>
         <View className="flex flex-row  items-center">
           <View className=" p-1">

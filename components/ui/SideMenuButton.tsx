@@ -9,14 +9,14 @@ const SideMenuButton = ({
 }: {
   text: string;
   children: React.ReactNode;
-  route: Href<string | object>;
+  route?: Href<string | object>;
 }) => {
   const router = useRouter();
   return (
     <Pressable
       className="hover:border-primary hover:text-primary  border-y-2 flex flex-row p-2 border-gray-text items-center space-x-2"
       onPress={() => {
-        router.push(route);
+        route && router.push(route);
       }}
     >
       <View className="w-[20px]">{children}</View>

@@ -16,6 +16,7 @@ const AppContextProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<userT | undefined>(undefined);
   const [bankInfo, setBankInfo] = useState<bankInfoT>(retrieveBankInfo());
   const [navOpen, setNavOpen] = useState<boolean>(false);
+  const [refereshUserInfo, setRefereshUserInfo] = useState<boolean>(false);
 
   return (
     <AppContext.Provider
@@ -26,6 +27,8 @@ const AppContextProvider = ({ children }: { children: React.ReactNode }) => {
         setNavOpen,
         bankInfo,
         setBankInfo,
+        refereshUserInfo,
+        setRefereshUserInfo,
       }}
     >
       {children}

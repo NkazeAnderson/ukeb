@@ -11,7 +11,7 @@ export const colors = {
   "gray-text": "#cbccd1",
   background: "#161b2f",
 };
-export const baseAccountNumber = "UKEB0182618271";
+export const baseAccountNumber = "GB34MYMB230580433889";
 // export const user: userT = {
 //   firstName: "Wale",
 //   lastName: "Wale",

@@ -1,5 +1,5 @@
 import { View, Text } from "react-native";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { FontAwesome } from "@expo/vector-icons";
 import { colors } from "@/constants/constants";
 import { Link } from "expo-router";
@@ -7,19 +7,15 @@ import InputComponent from "@/components/ui/InputComponent";
 import Button from "@/components/ui/Button";
 import { ScrollView } from "react-native-gesture-handler";
 import Footer from "@/components/Footer/Footer";
+import { AppContext } from "@/components/ContextProviders/AppContext";
 
-const companyInfo = {
-  phone: "4499338837",
-  email: "info@ukexchange.com",
-  address: "1442 Ave, London, UK, AKSZJ",
-  whatsapp: "4499338837",
-};
 const contactUs = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
   const [sent, setSent] = useState(false);
+  const { bankInfo } = useContext(AppContext) as appContextT;
   function submit() {
     setPending(true);
     setTimeout(() => {
@@ -45,19 +41,19 @@ const contactUs = () => {
               time
             </Text>
             <View className="space-y-2">
-              {companyInfo.phone && (
+              {bankInfo.phone && (
                 <View className="flex flex-row space-x-2 items-center">
                   <FontAwesome name="phone" size={18} color={colors.white} />
                   <Text className="font-medium text-18 text-white">Phone:</Text>
                   <Link
-                    href={`tel:+${companyInfo.phone}`}
+                    href={`tel:+${bankInfo.phone}`}
                     className="font-regular text-16 text-primary"
                   >
-                    {companyInfo.phone}
+                    {"+" + bankInfo.phone}
                   </Link>
                 </View>
               )}
-              {companyInfo.email && (
+              {bankInfo.email && (
                 <View className="flex flex-row space-x-2 items-center">
                   <FontAwesome
                     name="mail-forward"
@@ -66,28 +62,29 @@ const contactUs = () => {
                   />
                   <Text className="font-medium text-18 text-white">Email:</Text>
                   <Link
-                    href={`mailto:${companyInfo.email}`}
+                    href={`mailto:${bankInfo.email}`}
                     className="font-regular text-16 text-primary"
                   >
-                    {companyInfo.email}
+                    {bankInfo.email}
                   </Link>
                 </View>
               )}
-              {companyInfo.whatsapp && (
+              {bankInfo.whatsapp && (
                 <View className="flex flex-row space-x-2 items-center">
                   <FontAwesome name="whatsapp" size={18} color={colors.white} />
                   <Text className="font-medium text-18 text-white">
                     Whatsapp:
                   </Text>
                   <Link
-                    href={`https://wa.me/${companyInfo.whatsapp}`}
+                    href={`https://wa.me/+${bankInfo.whatsapp}`}
+                    target="_blank"
                     className="font-regular text-16 text-primary"
                   >
-                    {companyInfo.whatsapp}
+                    {"+" + bankInfo.whatsapp}
                   </Link>
                 </View>
               )}
-              {companyInfo.address && (
+              {bankInfo.address && (
                 <View className="flex flex-row space-x-2 items-center">
                   <FontAwesome
                     name="location-arrow"
@@ -98,7 +95,7 @@ const contactUs = () => {
                     Address:
                   </Text>
                   <Text className="font-regular text-16 text-white">
-                    {companyInfo.address}
+                    {bankInfo.address}
                   </Text>
                 </View>
               )}

@@ -12,8 +12,9 @@ const ContactSection = () => {
         and charges
       </Text>
       <Text className="text-center text-16 font-regular text-gray-text">
-        Alternatively, use our UK Exchange Business Account tariff calculator to
-        find out how much your charges could be and see how much you could save.
+        Alternatively, use our UK Metropolitan Business Account tariff
+        calculator to find out how much your charges could be and see how much
+        you could save.
       </Text>
       <View className="flex flex-col md:flex-row items-center justify-center ">
         <View className="w-1/2 md:w-1/4 lg:w-1/6">

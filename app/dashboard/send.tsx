@@ -10,12 +10,6 @@ import { ID, Query } from "appwrite";
 import { router } from "expo-router";
 import useToast from "@/hooks/useToast";
 
-function getAccount(accountNumber: string) {
-  console.log(accountNumber.split(baseAccountNumber)[0]);
-
-  return accountNumber.split(baseAccountNumber)[0];
-}
-
 async function submit({
   accountNumber,
   amount,
@@ -132,7 +126,7 @@ async function submit({
 }
 
 const send = () => {
-  const { user, setUser } = useContext(AppContext) as appContextT;
+  const { user, setRefereshUserInfo } = useContext(AppContext) as appContextT;
   const [width, setWidth] = useState(0);
   const [accountNumber, setAccountNumber] = useState("");
   const [amount, setAmount] = useState("");
@@ -243,6 +237,7 @@ const send = () => {
                           text2: "You sent money to " + accountNumber,
                           type: "success",
                         });
+                        setRefereshUserInfo((prev) => !prev);
                         router.push("/dashboard");
                       })
                       .catch((e) => {

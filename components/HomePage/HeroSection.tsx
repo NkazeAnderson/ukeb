@@ -49,8 +49,8 @@ const HeroSection = () => {
             <View className="w-full h-[250px] md:h-full">
               <Image
                 className="flex-1"
-                resizeMode="stretch"
-                source={require("@/assets/images/business-people.jpg")}
+                resizeMode="cover"
+                source={require("@/assets/images/business-people.png")}
               />
             </View>
           </View>

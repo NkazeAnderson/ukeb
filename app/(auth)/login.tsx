@@ -76,7 +76,7 @@ const Login = () => {
               </View>
             </View>
             <Text className=" font-bold text-18 md:text-32 text-background text-center">
-              UK Exchange Bank
+              UK Metropolitan Bank
             </Text>
             <Text className=" font-bold text-32 md:text-48 text-background text-center">
               Login
@@ -131,11 +131,10 @@ const Login = () => {
                         email: email.toLowerCase(),
                         password: password.toLowerCase(),
                       })
-                        .then((res) => {
-                          setUser(res);
+                        .then(() => {
                           setTimeout(() => {
                             router.push("/dashboard");
-                          }, 1000);
+                          }, 100);
                           useToast({
                             type: "success",
                             text1: "Welcome",

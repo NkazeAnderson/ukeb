@@ -49,4 +49,6 @@ type appContextT = {
   setNavOpen: React.Dispatch<React.SetStateAction<boolean>>;
   bankInfo: bankInfoT;
   setBankInfo: React.Dispatch<React.SetStateAction<bankInfoT>>;
+  refereshUserInfo: boolean;
+  setRefereshUserInfo: React.Dispatch<React.SetStateAction<boolean>>;
 };
