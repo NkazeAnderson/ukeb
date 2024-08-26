@@ -1,16 +1,16 @@
 {
   "expo": {
-    "name": "ukeb",
-    "slug": "ukeb",
+    "name": "UKMB_Finance",
+    "slug": "ukmb",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/ukeb-logo.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/images/splash.png",
+      "image": "./assets/images/ukeb-logo.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#161b2f"
     },
     "ios": {
       "supportsTablet": true
@@ -19,16 +19,34 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.walexxx23.ukmb"
     },
     "web": {
       "bundler": "metro",
       "output": "static",
       "favicon": "./assets/images/ukeb-logo.png"
     },
-    "plugins": ["expo-router"],
+    "plugins": [
+      "expo-router"
+    ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "a59df55c-74e9-445f-898b-f94ea112ab9d"
+      }
+    },
+    "owner": "walexxx23",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/a59df55c-74e9-445f-898b-f94ea112ab9d"
     }
   }
 }

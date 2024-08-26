@@ -1,6 +1,8 @@
-import { View, Text, Image } from "react-native";
+import { View, Text, Image, Pressable } from "react-native";
 import React from "react";
 import { Link } from "expo-router";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import { colors } from "@/constants/constants";
 
 const Footer = () => {
   return (

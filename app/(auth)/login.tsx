@@ -38,7 +38,6 @@ const Login = () => {
               databaseInfo.collections.users, // collectionId
               [Query.equal("email", res.email)] // queries (optional)
             );
-            console.log(userData);
 
             if (userData.total === 1) {
               //@ts-expect-error uset

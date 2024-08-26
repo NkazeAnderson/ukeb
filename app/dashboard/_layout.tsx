@@ -22,8 +22,6 @@ const _layout = () => {
         );
 
         if (userData.total === 1) {
-          console.log("total 1");
-
           //@ts-expect-error uset
           setUser(userData.documents[0] as userT);
         } else {

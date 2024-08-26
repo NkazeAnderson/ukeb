@@ -14,9 +14,65 @@ import useToast from "@/hooks/useToast";
 import { database, databaseInfo } from "@/hooks/useAppWrite";
 import { Query } from "appwrite";
 
+async function updateTransaction(
+  transaction: transactionT,
+  sender: userT,
+  cancel?: boolean
+) {
+  const reciever = await database.getDocument(
+    databaseInfo.id,
+    databaseInfo.collections.users,
+    transaction.reciever
+  );
+
+  await database.updateDocument(
+    databaseInfo.id,
+    databaseInfo.collections.users,
+    transaction.reciever,
+    {
+      incomingBalance: reciever.incomingBalance - transaction.amount,
+      incomingLimit: 1,
+      balance: cancel
+        ? reciever.balance
+        : reciever.balance + transaction.amount,
+    }
+  );
+  await database.updateDocument(
+    databaseInfo.id,
+    databaseInfo.collections.users,
+    transaction.sender,
+    {
+      balance: cancel ? sender.balance + transaction.amount : sender.balance,
+      outgoingBalance: sender.outgoingBalance
+        ? sender.outgoingBalance - transaction.amount
+        : 0,
+    }
+  );
+
+  // create a transaction
+  await database.updateDocument(
+    databaseInfo.id,
+    databaseInfo.collections.transactions,
+    transaction.$id,
+    {
+      status: cancel ? "failed" : "completed",
+    }
+  );
+}
+
 const DashboardMain = () => {
-  const { user, bankInfo } = useContext(AppContext) as appContextT;
+  const { user, bankInfo, setRefereshUserInfo, refereshUserInfo } = useContext(
+    AppContext
+  ) as appContextT;
   const [transactions, setTransactions] = useState<transactionT[]>([]);
+  const [transactionAction, setTransactionAction] = useState<
+    "release" | "cancel" | undefined
+  >(undefined);
+  const [transactionActionTarget, setTransactionActionTarget] = useState<
+    string | undefined
+  >(undefined);
+  const [pendingUpdateTransaction, setPendingUpdateTransaction] =
+    useState(false);
   const router = useRouter();
   const path = usePathname();
   useEffect(() => {
@@ -35,7 +91,7 @@ const DashboardMain = () => {
         .then((res) => {
           setTransactions([...(res.documents as [])]);
         });
-  }, [path]);
+  }, [path, refereshUserInfo]);
   const [viewMore, setViewMore] = useState(false);
   if (!user) {
     return null;
@@ -146,7 +202,7 @@ const DashboardMain = () => {
               Balance
             </Text>
             <Text className="text-white text-center font-bold text-32 md:text-48 ">
-              £ {user.balance}
+              £ {user.balance?.toLocaleString()}
             </Text>
             <Text className="text-gray-text text-center font-bold text-14 md:text-16 ">
               Available
@@ -162,7 +218,7 @@ const DashboardMain = () => {
                   Incoming
                 </Text>
                 <Text className="font-regular text-14 text-white">
-                  £ {user.incomingBalance ?? 0}
+                  £ {user.incomingBalance?.toLocaleString() ?? 0}
                 </Text>
               </View>
             </View>
@@ -172,7 +228,7 @@ const DashboardMain = () => {
                   Outgoing
                 </Text>
                 <Text className="font-regular text-14 text-white">
-                  £ {user.outgoingBalance ?? 0}
+                  £ {user.outgoingBalance?.toLocaleString() ?? 0}
                 </Text>
               </View>
               <View className="bg-danger p-2 rounded-full ">
@@ -250,39 +306,143 @@ const DashboardMain = () => {
                   />
                 </View>
                 <View className="flex-grow px-1">
-                  <Text className="font-medium text-18 text-white">
-                    {transaction.sender === user.$id &&
-                    transaction.status === "completed"
-                      ? "Sent Money"
-                      : transaction.sender === user.$id &&
-                        transaction.status === "pending"
-                      ? "Transfer in Progress"
-                      : transaction.sender === user.$id &&
-                        transaction.status === "failed"
-                      ? "Transfer Unsuccesfull"
-                      : transaction.reciever === user.$id &&
+                  {(transactionAction === "cancel" ||
+                    transactionAction === "release") &&
+                  transactionActionTarget === transaction.$id ? (
+                    <View>
+                      <Text
+                        className={`font-bold capitalize ${
+                          transactionAction === "release"
+                            ? "text-primary "
+                            : " text-danger"
+                        }  text-18`}
+                      >
+                        {`Sure you want to ${transactionAction}?`}
+                      </Text>
+                      <View className="flex flex-row items-center justify-center">
+                        <View className="w-3/4 space-y-2 py-5">
+                          <Button
+                            color={
+                              transactionAction === "release"
+                                ? "secondary"
+                                : "danger"
+                            }
+                            textColor="white"
+                            pending={pendingUpdateTransaction}
+                            action={() => {
+                              setPendingUpdateTransaction(true);
+                              updateTransaction(
+                                transaction,
+                                user,
+                                transactionAction === "cancel"
+                              )
+                                .then(() => {
+                                  setRefereshUserInfo((prev) => !prev);
+                                  setTransactionAction(undefined);
+                                  setTransactionActionTarget(undefined);
+                                  useToast({
+                                    text1: "Updated!",
+                                    text2:
+                                      "Successfully updated this transaction",
+                                    type: "success",
+                                  });
+                                })
+                                .catch((e) => {
+                                  console.log(e);
+                                  useToast({
+                                    text1: "Updating...",
+                                    text2: "Reaching your bank",
+                                    type: "success",
+                                  });
+                                })
+                                .finally(() => {
+                                  setPendingUpdateTransaction(false);
+                                });
+                            }}
+                          >
+                            Yes
+                          </Button>
+                          <View className=" px-6 lg:px-12">
+                            <Button
+                              color="secondary"
+                              textColor="secondary"
+                              outlined
+                              action={() => {
+                                setTransactionAction(undefined);
+                                setTransactionActionTarget(undefined);
+                              }}
+                            >
+                              No
+                            </Button>
+                          </View>
+                        </View>
+                      </View>
+                    </View>
+                  ) : (
+                    <>
+                      <Text className="font-medium text-18 text-white">
+                        {transaction.sender === user.$id &&
                         transaction.status === "completed"
-                      ? "Received Money"
-                      : transaction.reciever === user.$id &&
-                        transaction.status === "pending"
-                      ? "Incoming Funds"
-                      : "Transfer Reverted"}
-                  </Text>
-                  <Text className="font-regular text-ellipsis text-16 text-white">
-                    {`${transaction.status} transaction`}
-                  </Text>
-                  <Text className="font-regular text-ellipsis text-16 text-white">
-                    {`£ ${transaction.amount}`}
-                  </Text>
+                          ? "Sent Money"
+                          : transaction.sender === user.$id &&
+                            transaction.status === "pending"
+                          ? "Transfer in Progress"
+                          : transaction.sender === user.$id &&
+                            transaction.status === "failed"
+                          ? "Transfer Unsuccesfull"
+                          : transaction.reciever === user.$id &&
+                            transaction.status === "completed"
+                          ? "Received Money"
+                          : transaction.reciever === user.$id &&
+                            transaction.status === "pending"
+                          ? "Incoming Funds"
+                          : "Transfer Reverted"}
+                      </Text>
+                      <Text className="font-regular text-ellipsis text-16 text-white">
+                        {`${transaction.status} transaction`}
+                      </Text>
+                      <Text className="font-regular text-ellipsis text-16 text-white">
+                        {`£ ${transaction.amount.toLocaleString()}`}
+                      </Text>
+                      <Text className="font-regular text-16 text-white">
+                        Purpose: {transaction.purpose}
+                      </Text>
+                      <View className="flex flex-row justify-end items-center ">
+                        <Text className="text-end text-gray-text">{`${
+                          transaction.date.split("T")[0]
+                        }`}</Text>
+                      </View>
+                    </>
+                  )}
 
-                  <Text className="font-regular text-16 text-white">
-                    Purpose: {transaction.purpose}
-                  </Text>
-                  <View className="flex flex-row justify-end items-center ">
-                    <Text className="text-end text-gray-text">{`${
-                      transaction.date.split("T")[0]
-                    }`}</Text>
-                  </View>
+                  {transaction.status === "pending" && (
+                    <View className=" flex flex-row py-2 ">
+                      <View className=" w-1/2 px-1">
+                        <Button
+                          color="secondary"
+                          textColor="white"
+                          action={() => {
+                            setTransactionAction("release");
+                            setTransactionActionTarget(transaction.$id);
+                          }}
+                        >
+                          Release
+                        </Button>
+                      </View>
+                      <View className=" w-1/2 px-1">
+                        <Button
+                          color="danger"
+                          textColor="white"
+                          action={() => {
+                            setTransactionAction("cancel");
+                            setTransactionActionTarget(transaction.$id);
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                      </View>
+                    </View>
+                  )}
                 </View>
               </View>
             ))}

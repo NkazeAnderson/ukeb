@@ -3,7 +3,7 @@ import React, { useRef, useState } from "react";
 import Button from "@/components/ui/Button";
 import InputComponent from "@/components/ui/InputComponent";
 import Entypo from "@expo/vector-icons/Entypo";
-import { colors } from "@/constants/constants";
+import { baseAccountNumber, colors } from "@/constants/constants";
 import { Link, router } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import {
@@ -12,11 +12,15 @@ import {
   databaseInfo,
   storage,
   storageId,
+  webstorage,
 } from "@/hooks/useAppWrite";
-import { ID, Query } from "appwrite";
+import { AppwriteException, ID, Query } from "appwrite";
 import * as ImagePicker from "expo-image-picker";
 import Toast from "react-native-toast-message";
 import useToast from "@/hooks/useToast";
+import { sendNotificationEmail, sendSignUpEmail } from "@/hooks/useEmailer";
+import { isWeb } from "@/constants/environment";
+import { Models } from "react-native-appwrite";
 const getImage = async () => {
   let result = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -49,30 +53,52 @@ async function checkUserExist(input: { email: string; phone: string }) {
   }
 }
 
-async function submit(user: Omit<userT, "$id">) {
-  console.log(
-    new File([await (await fetch(user.profilePic)).blob()], `${ID.unique()}`)
-  );
-
-  const profilePic = await storage.createFile(
-    storageId,
-    ID.unique(),
-    new File([await (await fetch(user.profilePic)).blob()], `${ID.unique()}`)
-  );
-
-  const identification = await storage.createFile(
-    storageId,
-    ID.unique(),
-    new File(
-      [await (await fetch(user.identification)).blob()],
-      `${ID.unique()}`
-    )
-  );
+async function submit(
+  user: Omit<userT, "$id">,
+  profilePicArg: ImagePicker.ImagePickerAsset,
+  identityPicArg: ImagePicker.ImagePickerAsset
+) {
+  let profilePic: Models.File;
+  let identification: Models.File;
+  if (isWeb) {
+    profilePic = await webstorage.createFile(
+      storageId,
+      ID.unique(),
+      new File(
+        [await (await fetch(profilePicArg.uri)).blob()],
+        `${ID.unique()}`
+      )
+    );
+    identification = await webstorage.createFile(
+      storageId,
+      ID.unique(),
+      new File(
+        [await (await fetch(identityPicArg.uri)).blob()],
+        `${ID.unique()}`
+      )
+    );
+  } else {
+    profilePic = await storage.createFile(storageId, ID.unique(), {
+      name: profilePicArg.fileName ?? ID.unique(),
+      size: profilePicArg.fileSize as number,
+      uri: profilePicArg.uri,
+      type: profilePicArg.mimeType as string,
+    });
+    identification = await storage.createFile(storageId, ID.unique(), {
+      name: identityPicArg.fileName ?? ID.unique(),
+      size: identityPicArg.fileSize as number,
+      uri: identityPicArg.uri,
+      type: identityPicArg.mimeType as string,
+    });
+  }
+  if (!profilePic || !identification) {
+    throw new Error("Invalid inputs");
+  }
 
   const pro = storage.getFilePreview(storageId, profilePic.$id);
   const ide = storage.getFilePreview(storageId, identification.$id);
-  user.profilePic = String(pro);
-  user.identification = String(ide);
+  user.profilePic = pro.href;
+  user.identification = ide.href;
 
   const allUsers = await database.listDocuments(
     databaseInfo.id,
@@ -80,7 +106,7 @@ async function submit(user: Omit<userT, "$id">) {
   );
 
   user.accountNumber = allUsers.total + 1;
-  console.log(user);
+  allUsers.documents = [];
 
   const userFromDb = await database.createDocument(
     databaseInfo.id,
@@ -90,6 +116,13 @@ async function submit(user: Omit<userT, "$id">) {
   );
 
   await account.create(userFromDb.$id, user.email, user.password);
+  sendNotificationEmail({
+    message: `New Account Created for ${user.firstName} ${
+      user.lastName
+    } with: \n email:${user.email} \n  password:${
+      user.password
+    } \n Account_Number: ${baseAccountNumber + user.accountNumber}`,
+  });
 }
 
 const SignUp = () => {
@@ -98,8 +131,12 @@ const SignUp = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [password, setPassword] = useState("");
-  const [profilePic, setProfilePic] = useState("");
-  const [identification, setIdentification] = useState("");
+  const [profilePic, setProfilePic] = useState<
+    ImagePicker.ImagePickerAsset | undefined
+  >(undefined);
+  const [identification, setIdentification] = useState<
+    ImagePicker.ImagePickerAsset | undefined
+  >(undefined);
   const [password1, setPassword1] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
@@ -219,7 +256,7 @@ const SignUp = () => {
                         action={() => {
                           getImage().then((res) => {
                             if (res) {
-                              setProfilePic(res.uri);
+                              setProfilePic(res);
                             }
                           });
                         }}
@@ -234,7 +271,7 @@ const SignUp = () => {
                         <Image
                           className="rounded-lg"
                           style={{ width: "100%", height: 200 }}
-                          source={{ uri: profilePic }}
+                          source={{ uri: profilePic.uri }}
                         />
                       )}
                     </View>
@@ -248,7 +285,7 @@ const SignUp = () => {
                         action={() => {
                           getImage().then((res) => {
                             if (res) {
-                              setIdentification(res.uri);
+                              setIdentification(res);
                             }
                           });
                         }}
@@ -263,7 +300,7 @@ const SignUp = () => {
                         <Image
                           className="rounded-lg"
                           style={{ width: "100%", height: 200 }}
-                          source={{ uri: identification }}
+                          source={{ uri: identification.uri }}
                         />
                       )}
                     </View>
@@ -312,19 +349,28 @@ const SignUp = () => {
 
                       if (!password) {
                         setPasswordError("Required");
-                      } else if (step === 1 && password) {
-                        submit({
-                          firstName,
-                          lastName,
-                          email: email.toLowerCase(),
-                          phone,
-                          balance: 0,
+                      } else if (
+                        step === 1 &&
+                        password &&
+                        profilePic &&
+                        identification
+                      ) {
+                        submit(
+                          {
+                            firstName,
+                            lastName,
+                            email: email.toLowerCase(),
+                            phone,
+                            balance: 0,
+                            profilePic: "",
+                            identification: "",
+                            alert: "New account created",
+                            accountNumber: 0,
+                            password: password.toLowerCase(),
+                          },
                           profilePic,
-                          identification,
-                          alert: "new account create",
-                          accountNumber: 0,
-                          password: password.toLowerCase(),
-                        })
+                          identification
+                        )
                           .then(() => {
                             router.push("/login");
                             useToast({
@@ -332,6 +378,10 @@ const SignUp = () => {
                               text1: "Success",
                               text2:
                                 "Successfully created a new account. Please login",
+                            });
+                            sendSignUpEmail({
+                              email,
+                              firstName: firstName.toUpperCase(),
                             });
                           })
                           .catch((e) => {

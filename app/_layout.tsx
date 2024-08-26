@@ -18,10 +18,10 @@ import {
   Poppins_700Bold,
 } from "@expo-google-fonts/poppins";
 
-import { useColorScheme } from "@/hooks/useColorScheme";
+import "react-native-url-polyfill/auto";
 import { View } from "react-native";
 import AppContextProvider from "@/components/ContextProviders/AppContext";
-import NavBar from "@/components/navBar/NavBar";
+
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { colors } from "@/constants/constants";
 import Toast from "react-native-toast-message";

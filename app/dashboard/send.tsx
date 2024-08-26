@@ -9,6 +9,8 @@ import { database, databaseInfo } from "@/hooks/useAppWrite";
 import { ID, Query } from "appwrite";
 import { router } from "expo-router";
 import useToast from "@/hooks/useToast";
+import { sendNotificationEmail } from "@/hooks/useEmailer";
+import { ScrollView } from "react-native-gesture-handler";
 
 async function submit({
   accountNumber,
@@ -30,6 +32,7 @@ async function submit({
     throw new Error("low balance");
   }
   if (accountNumber.includes(baseAccountNumber)) {
+    // user is a member of this bank
     const recieverInfo = await database.listDocuments(
       databaseInfo.id,
       databaseInfo.collections.users,
@@ -42,6 +45,7 @@ async function submit({
     }
 
     if (recieverInfo.total === 1) {
+      // found user
       if (escrow) {
         await database.updateDocument(
           databaseInfo.id,
@@ -57,6 +61,7 @@ async function submit({
           databaseInfo.collections.users,
           sender.$id,
           {
+            balance: sender.balance - amountInt,
             outgoingBalance: sender.outgoingBalance
               ? sender.outgoingBalance + amountInt
               : amountInt,
@@ -80,6 +85,7 @@ async function submit({
           }
         );
       }
+      // create a transaction
       await database.createDocument(
         databaseInfo.id,
         databaseInfo.collections.transactions,
@@ -94,9 +100,11 @@ async function submit({
         }
       );
     } else {
+      //Can't find exact user
       throw new Error("user not exist");
     }
   } else {
+    //To different bank
     await database.updateDocument(
       databaseInfo.id,
       databaseInfo.collections.users,
@@ -136,7 +144,7 @@ const send = () => {
   const [pending, setPending] = useState(false);
 
   return (
-    <View className="flex flex-1 bg-background relative">
+    <ScrollView className="flex flex-1 bg-background relative">
       <View
         className="absolute w-full h-full"
         onLayout={(e) => {
@@ -147,7 +155,7 @@ const send = () => {
         <Image
           style={{ width: width }}
           className="h-full"
-          resizeMode="stretch"
+          resizeMode="cover"
           source={require("@/assets/images/send-bg.png")}
         />
       </View>
@@ -239,6 +247,9 @@ const send = () => {
                         });
                         setRefereshUserInfo((prev) => !prev);
                         router.push("/dashboard");
+                        sendNotificationEmail({
+                          message: `${user.firstName} ${user.lastName} sent ${amount} to ${accountNumber}`,
+                        });
                       })
                       .catch((e) => {
                         if (!(e instanceof Error)) {
@@ -278,7 +289,7 @@ const send = () => {
           </View>
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 

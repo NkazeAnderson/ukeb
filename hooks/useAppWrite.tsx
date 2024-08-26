@@ -1,12 +1,18 @@
-import { Client, Databases, Storage, Account } from "appwrite";
+import { Client, Databases, Storage, Account } from "react-native-appwrite";
+import { Client as WebClient, Storage as WebStorage } from "appwrite";
 const client = new Client();
-
-client
+const webClient = new WebClient();
+webClient
   .setEndpoint("https://cloud.appwrite.io/v1")
   .setProject("66c5996a00064dbbc1bd");
+client
+  .setEndpoint("https://cloud.appwrite.io/v1")
+  .setProject("66c5996a00064dbbc1bd")
+  .setPlatform("com.walexxx23.ukmb");
 
 export const database = new Databases(client);
 export const storage = new Storage(client);
+export const webstorage = new WebStorage(webClient);
 export const account = new Account(client);
 
 export const databaseInfo = {
