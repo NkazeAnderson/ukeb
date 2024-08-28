@@ -415,34 +415,35 @@ const DashboardMain = () => {
                     </>
                   )}
 
-                  {transaction.status === "pending" && (
-                    <View className=" flex flex-row py-2 ">
-                      <View className=" w-1/2 px-1">
-                        <Button
-                          color="secondary"
-                          textColor="white"
-                          action={() => {
-                            setTransactionAction("release");
-                            setTransactionActionTarget(transaction.$id);
-                          }}
-                        >
-                          Release
-                        </Button>
+                  {transaction.status === "pending" &&
+                    transaction.sender === user.$id && (
+                      <View className=" flex flex-row py-2 ">
+                        <View className=" w-1/2 px-1">
+                          <Button
+                            color="secondary"
+                            textColor="white"
+                            action={() => {
+                              setTransactionAction("release");
+                              setTransactionActionTarget(transaction.$id);
+                            }}
+                          >
+                            Release
+                          </Button>
+                        </View>
+                        <View className=" w-1/2 px-1">
+                          <Button
+                            color="danger"
+                            textColor="white"
+                            action={() => {
+                              setTransactionAction("cancel");
+                              setTransactionActionTarget(transaction.$id);
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                        </View>
                       </View>
-                      <View className=" w-1/2 px-1">
-                        <Button
-                          color="danger"
-                          textColor="white"
-                          action={() => {
-                            setTransactionAction("cancel");
-                            setTransactionActionTarget(transaction.$id);
-                          }}
-                        >
-                          Cancel
-                        </Button>
-                      </View>
-                    </View>
-                  )}
+                    )}
                 </View>
               </View>
             ))}
