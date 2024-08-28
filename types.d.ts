@@ -19,6 +19,7 @@ type userT = {
   accountNumber: number;
   incomingLimit?: number;
   outgoingLimit?: number;
+  pseudoEmail: string;
 };
 type transactionT = {
   $id: string;

@@ -9,28 +9,36 @@ import { Query } from "appwrite";
 import { AppContext } from "@/components/ContextProviders/AppContext";
 
 const _layout = () => {
-  const { setUser, refereshUserInfo } = useContext(AppContext) as appContextT;
+  const { user, setUser, refereshUserInfo } = useContext(
+    AppContext
+  ) as appContextT;
   const router = useRouter();
   useEffect(() => {
-    account
-      .get()
-      .then(async (res) => {
-        const userData = await database.listDocuments(
-          databaseInfo.id, // databaseId
-          databaseInfo.collections.users, // collectionId
-          [Query.equal("email", res.email)] // queries (optional)
-        );
+    !user &&
+      account
+        .get()
+        .then(async (res) => {
+          const userData = await database.listDocuments(
+            databaseInfo.id, // databaseId
+            databaseInfo.collections.users, // collectionId
+            [
+              Query.or([
+                Query.equal("email", res.email),
+                Query.equal("pseudoEmail", res.email),
+              ]),
+            ] // queries (optional)
+          );
 
-        if (userData.total === 1) {
-          //@ts-expect-error uset
-          setUser(userData.documents[0] as userT);
-        } else {
-          throw new Error("User fetching user");
-        }
-      })
-      .catch((e) => {
-        router.push("/login");
-      });
+          if (userData.total === 1) {
+            //@ts-expect-error uset
+            setUser(userData.documents[0] as userT);
+          } else {
+            throw new Error("log manu users with id");
+          }
+        })
+        .catch((e) => {
+          router.push("/login");
+        });
   }, [refereshUserInfo]);
   return (
     <View className="flex flex-1 bg-background relative ">

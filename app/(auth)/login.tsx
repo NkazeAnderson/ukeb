@@ -11,14 +11,43 @@ import { account, database, databaseInfo } from "@/hooks/useAppWrite";
 import { Query } from "appwrite";
 import Toast from "react-native-toast-message";
 import useToast from "@/hooks/useToast";
+
+async function checkUserExist(input: { email: string }) {
+  try {
+    console.log("Chcecking if user exist");
+
+    const res = await database.listDocuments(
+      databaseInfo.id,
+      databaseInfo.collections.users,
+      [Query.equal("email", input.email)]
+    );
+
+    return res;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 async function logIn({ email, password }: { email: string; password: string }) {
-  const user = await account.createEmailPasswordSession(email, password);
-  const userData = await database.getDocument(
-    databaseInfo.id,
-    databaseInfo.collections.users,
-    user.userId
-  );
-  return userData as unknown extends userT ? userT : never;
+  const res = await checkUserExist({ email });
+  console.log("got userwit email");
+  console.log(res);
+
+  if (res) {
+    const pseudo = res.documents[0].pseudoEmail;
+    const emailDb = res.documents[0].email as string;
+    const user = await account.createEmailPasswordSession(
+      pseudo ? pseudo : emailDb,
+      password
+    );
+
+    const userData = await database.getDocument(
+      databaseInfo.id,
+      databaseInfo.collections.users,
+      user.userId
+    );
+    return userData as unknown extends userT ? userT : never;
+  }
 }
 const Login = () => {
   const { user, setUser } = useContext(AppContext) as appContextT;
@@ -36,8 +65,16 @@ const Login = () => {
             const userData = await database.listDocuments(
               databaseInfo.id, // databaseId
               databaseInfo.collections.users, // collectionId
-              [Query.equal("email", res.email)] // queries (optional)
+              [
+                Query.or([
+                  Query.equal("email", res.email),
+                  Query.equal("pseudoEmail", res.email),
+                ]),
+              ] // queries (optional)
             );
+            console.log("layouteffect");
+            console.log(res);
+            console.log(userData);
 
             if (userData.total === 1) {
               //@ts-expect-error uset
@@ -141,7 +178,9 @@ const Login = () => {
                           });
                           setPending(false);
                         })
-                        .catch(() => {
+                        .catch((e) => {
+                          console.log(e);
+
                           setPending(false);
                           useToast({
                             type: "error",
@@ -149,8 +188,6 @@ const Login = () => {
                             text2: "Connectivity or wrong credentials.",
                           });
                         });
-                    } else if (step === 1 && !password) {
-                      setPasswordError("Provide Password");
                     }
                   }}
                   color="primary"
