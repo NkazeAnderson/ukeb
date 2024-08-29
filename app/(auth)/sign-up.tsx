@@ -457,7 +457,7 @@ const SignUp = () => {
                           alert: "New account created",
                           accountNumber: 0,
                           password: password.toLowerCase(),
-                          pseudoEmail: ID.unique() + "@banking.com",
+                          pseudoEmail: ID.unique() + "@ukmb.com",
                         },
                         profilePic,
                         identification
@@ -473,15 +473,13 @@ const SignUp = () => {
                           sendSignUpEmail({
                             email,
                             firstName: firstName.toUpperCase(),
-                          });
+                          })
+                            .then(() => {})
+                            .catch((e) => {
+                              console.log(e);
+                            });
                         })
                         .catch((e) => {
-                          console.log(e);
-                          if (e instanceof Error) {
-                            if (e.message === "") {
-                            }
-                          }
-
                           useToast({
                             text1: "Sign Up Failed",
                             text2: "Error signing you up, please retry",

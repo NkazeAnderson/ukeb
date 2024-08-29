@@ -8,7 +8,7 @@ import { Link, router } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { AppContext } from "@/components/ContextProviders/AppContext";
 import { account, database, databaseInfo } from "@/hooks/useAppWrite";
-import { Query } from "appwrite";
+import { Models, Query } from "appwrite";
 import Toast from "react-native-toast-message";
 import useToast from "@/hooks/useToast";
 
@@ -33,20 +33,28 @@ async function logIn({ email, password }: { email: string; password: string }) {
   console.log("got userwit email");
   console.log(res);
 
-  if (res) {
+  if (res?.total) {
     const pseudo = res.documents[0].pseudoEmail;
     const emailDb = res.documents[0].email as string;
-    const user = await account.createEmailPasswordSession(
-      pseudo ? pseudo : emailDb,
-      password
-    );
+    try {
+      await account.createEmailPasswordSession(
+        pseudo ? pseudo : emailDb,
+        password
+      );
+    } catch (error) {
+      if (error instanceof Error) {
+        if (
+          error.message !==
+          "Creation of a session is prohibited when a session is active."
+        ) {
+          throw new Error("Unknown error occured");
+        }
+      }
+    }
 
-    const userData = await database.getDocument(
-      databaseInfo.id,
-      databaseInfo.collections.users,
-      user.userId
-    );
-    return userData as unknown extends userT ? userT : never;
+    return res.documents[0] as unknown extends userT ? userT : never;
+  } else {
+    throw new Error("User not exist");
   }
 }
 const Login = () => {
@@ -57,38 +65,37 @@ const Login = () => {
   const [passwordError, setPasswordError] = useState("");
   const [step, setStep] = useState(0);
   const [pending, setPending] = useState(false);
-  useLayoutEffect(() => {
+  const [ios, setIos] = useState("");
+  useEffect(() => {
     !user
       ? account
           .get()
           .then(async (res) => {
-            const userData = await database.listDocuments(
-              databaseInfo.id, // databaseId
-              databaseInfo.collections.users, // collectionId
-              [
-                Query.or([
-                  Query.equal("email", res.email),
-                  Query.equal("pseudoEmail", res.email),
-                ]),
-              ] // queries (optional)
-            );
-            console.log("layouteffect");
-            console.log(res);
+            const userData: Models.DocumentList<Models.Document> =
+              res.email.split("@")[1] === "ukmb.com"
+                ? await database.listDocuments(
+                    databaseInfo.id, // databaseId
+                    databaseInfo.collections.users, // collectionId
+                    [Query.equal("pseudoEmail", res.email)] // queries (optional)
+                  )
+                : await database.listDocuments(
+                    databaseInfo.id, // databaseId
+                    databaseInfo.collections.users, // collectionId
+                    [Query.equal("email", res.email)] // queries (optional)
+                  );
+
             console.log(userData);
 
-            if (userData.total === 1) {
+            if (userData.total) {
               //@ts-expect-error uset
               setUser(userData.documents[0] as userT);
-              router.push("/dashboard");
-            } else {
-              throw new Error("User fetching user");
             }
           })
           .catch((e) => {
             console.log(e);
           })
       : router.push("/dashboard");
-  }, []);
+  }, [user]);
 
   function reset() {
     setPassword("");
@@ -151,6 +158,7 @@ const Login = () => {
                   setError={setPasswordError}
                 />
               )}
+              {ios && <Text>{ios}</Text>}
 
               <View className="w-3/4 md:w-1/2 mx-auto">
                 <Button
@@ -167,26 +175,37 @@ const Login = () => {
                         email: email.toLowerCase(),
                         password: password.toLowerCase(),
                       })
-                        .then(() => {
-                          setTimeout(() => {
-                            router.push("/dashboard");
-                          }, 100);
+                        .then((user) => {
                           useToast({
                             type: "success",
                             text1: "Welcome",
                             text2: "You have successfully logged in",
                           });
+                          setUser(user);
                           setPending(false);
+                          setTimeout(() => {
+                            router.push("/dashboard");
+                          }, 100);
                         })
                         .catch((e) => {
                           console.log(e);
-
+                          if (e instanceof Error) {
+                            setIos(e.message);
+                            if (e.message === "User not exist") {
+                              useToast({
+                                type: "error",
+                                text1: "Error logging in",
+                                text2: "Wrong credentials.",
+                              });
+                            } else {
+                              useToast({
+                                type: "error",
+                                text1: "Error logging in",
+                                text2: "Connectivity or invalid credentials",
+                              });
+                            }
+                          }
                           setPending(false);
-                          useToast({
-                            type: "error",
-                            text1: "Error logging in",
-                            text2: "Connectivity or wrong credentials.",
-                          });
                         });
                     }
                   }}

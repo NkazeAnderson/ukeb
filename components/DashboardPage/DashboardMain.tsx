@@ -74,24 +74,22 @@ const DashboardMain = () => {
   const [pendingUpdateTransaction, setPendingUpdateTransaction] =
     useState(false);
   const router = useRouter();
-  const path = usePathname();
   useEffect(() => {
     if (!user) {
       return;
     }
-    path === "/dashboard" &&
-      database
-        .listDocuments(databaseInfo.id, databaseInfo.collections.transactions, [
-          Query.or([
-            Query.equal("sender", user.$id),
-            Query.equal("reciever", user.$id),
-          ]),
-          Query.orderDesc("date"),
-        ])
-        .then((res) => {
-          setTransactions([...(res.documents as [])]);
-        });
-  }, [path, refereshUserInfo]);
+    database
+      .listDocuments(databaseInfo.id, databaseInfo.collections.transactions, [
+        Query.or([
+          Query.equal("sender", user.$id),
+          Query.equal("reciever", user.$id),
+        ]),
+        Query.orderDesc("date"),
+      ])
+      .then((res) => {
+        setTransactions([...(res.documents as [])]);
+      });
+  }, [refereshUserInfo]);
   const [viewMore, setViewMore] = useState(false);
   if (!user) {
     return null;

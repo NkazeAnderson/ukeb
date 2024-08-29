@@ -110,7 +110,7 @@ export default function RootLayout() {
   }
 
   return (
-    <View className={"flex flex-1 w-screen bg-background"}>
+    <View className={"flex flex-1 w-screen max-w-[100vw] bg-background"}>
       <AppContextProvider>
         <GestureHandlerRootView className="flex flex-1 bg-background">
           <Stack
