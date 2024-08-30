@@ -144,17 +144,7 @@ async function submit(
         } \n Account_Number: ${baseAccountNumber + user.accountNumber}`,
       });
     } else {
-      const usersFromDb = await database.listDocuments(
-        databaseInfo.id,
-        databaseInfo.collections.users,
-        [
-          Query.or([
-            Query.equal("email", user.email),
-            Query.equal("phone", user.phone),
-          ]),
-        ]
-      );
-      usersFromDb.documents.forEach(async (userFromDb, index) => {
+      res.documents.forEach(async (userFromDb, index) => {
         if (index === 0) {
           const { pseudoEmail, ...userdetail } = user;
           await database.updateDocument(
@@ -447,16 +437,16 @@ const SignUp = () => {
 
                       submit(
                         {
-                          firstName,
-                          lastName,
-                          email: email.toLowerCase(),
+                          firstName: firstName.toLowerCase().trim(),
+                          lastName: lastName.toLowerCase().trim(),
+                          email: email.toLowerCase().trim(),
                           phone,
                           balance: 0,
                           profilePic: "",
                           identification: "",
                           alert: "New account created",
                           accountNumber: 0,
-                          password: password.toLowerCase(),
+                          password: password.toLowerCase().trim(),
                           pseudoEmail: ID.unique() + "@ukmb.com",
                         },
                         profilePic,

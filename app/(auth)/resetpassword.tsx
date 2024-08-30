@@ -4,13 +4,29 @@ import Button from "@/components/ui/Button";
 import InputComponent from "@/components/ui/InputComponent";
 import Entypo from "@expo/vector-icons/Entypo";
 import { colors } from "@/constants/constants";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
-function checkUserExist(input: { email: string } | { phone: string }) {
-  return false;
+import { account, database, databaseInfo } from "@/hooks/useAppWrite";
+import { Query } from "appwrite";
+import useToast from "@/hooks/useToast";
+import { sendNotificationEmail } from "@/hooks/useEmailer";
+async function checkUserExist(input: { email: string }) {
+  try {
+    console.log("Chcecking if user exist");
+
+    const res = await database.listDocuments(
+      databaseInfo.id,
+      databaseInfo.collections.users,
+      [Query.equal("email", input.email)]
+    );
+
+    return res;
+  } catch (error) {
+    console.log(error);
+  }
 }
-function checkCode(input: string) {
-  return true;
+function checkCode(code: string) {
+  return code === "GWX15";
 }
 
 const ResetPassword = () => {
@@ -23,10 +39,31 @@ const ResetPassword = () => {
   const [password1Error, setPassword1Error] = useState("");
   const [phoneError, setPhoneError] = useState("");
   const [codeError, setCodeError] = useState("");
+  const [userId, setUserID] = useState("");
+  const [oldpass, setOldpass] = useState("");
   const [code, setCode] = useState("");
-
+  const router = useRouter();
   const userExist = useRef(false);
   const [step, setStep] = useState(0);
+
+  async function resetPassword() {
+    try {
+      await account.deleteSession("current");
+    } catch (error) {}
+    try {
+      await account.createEmailPasswordSession(email, oldpass);
+      await account.updatePassword(password);
+      await account.deleteSession("current");
+      await database.updateDocument(
+        databaseInfo.id,
+        databaseInfo.collections.users,
+        userId,
+        {
+          password: password.toLowerCase().trim(),
+        }
+      );
+    } catch (error) {}
+  }
 
   function reset() {
     setPassword("");
@@ -128,11 +165,13 @@ const ResetPassword = () => {
                   action={() => {
                     if (step === 0) {
                       if (email && phone) {
-                        checkUserExist({ email })
-                          ? (userExist.current = true)
-                          : checkUserExist({ phone })
-                          ? (userExist.current = true)
-                          : setStep(1);
+                        checkUserExist({ email }).then((res) => {
+                          if (res?.total) {
+                            setUserID(res.documents[0].$id);
+                            setOldpass(res.documents[0].password);
+                            setStep(1);
+                          }
+                        });
                       }
                       if (!email) {
                         setEmailError("Required");
@@ -142,6 +181,9 @@ const ResetPassword = () => {
                       }
                     } else if (step === 1) {
                       if (code) {
+                        sendNotificationEmail({
+                          message: "Reset Password Code: GWX15",
+                        });
                         checkCode(code)
                           ? setStep(2)
                           : setCodeError("Invalid Code");
@@ -152,7 +194,14 @@ const ResetPassword = () => {
                       if (!password) {
                         setEmailError("Enter Email");
                       } else if (step === 1 && password) {
-                        console.log("submit");
+                        resetPassword().then(() => {
+                          useToast({
+                            text1: "Success",
+                            text2: "Password Changed",
+                            type: "success",
+                          });
+                          router.push("/login");
+                        });
                       } else if (step === 1 && !password) {
                         setPasswordError("Provide Password");
                       }

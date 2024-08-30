@@ -42,6 +42,8 @@ async function logIn({ email, password }: { email: string; password: string }) {
         password
       );
     } catch (error) {
+      console.log(error);
+
       if (error instanceof Error) {
         if (
           error.message !==
@@ -172,8 +174,8 @@ const Login = () => {
                       setPending(false);
                     } else if (step === 1 && password) {
                       logIn({
-                        email: email.toLowerCase(),
-                        password: password.toLowerCase(),
+                        email: email.toLowerCase().trim(),
+                        password: password.toLowerCase().trim(),
                       })
                         .then((user) => {
                           useToast({
@@ -190,7 +192,7 @@ const Login = () => {
                         .catch((e) => {
                           console.log(e);
                           if (e instanceof Error) {
-                            setIos(e.message);
+                            //setIos(e.message);
                             if (e.message === "User not exist") {
                               useToast({
                                 type: "error",
