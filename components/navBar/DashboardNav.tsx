@@ -84,6 +84,11 @@ const DashboardNav = () => {
             <SideMenuButton text="Settings" route={"/dashboard/settings"}>
               <FontAwesome name="gear" size={14} color={colors.white} />
             </SideMenuButton>
+            {user.isAdmin && (
+              <SideMenuButton text="Admin" route={"/dashboard/admin"}>
+                <FontAwesome name="expand" size={14} color={colors.white} />
+              </SideMenuButton>
+            )}
           </View>
           <View className="">
             <SideMenuButton
@@ -108,16 +113,15 @@ const DashboardNav = () => {
                   account
                     .deleteSession("current")
                     .then(() => {
-                      setTimeout(() => {
-                        router.push("/");
-                      }, 500);
-
                       setUser(undefined);
                       setPending(false);
                       useToast({
                         type: "success",
                         text1: "Logged Out",
                         text2: "You are now logged out",
+                        onHide: () => {
+                          router.push("/login");
+                        },
                       });
                     })
                     .catch((e) => {

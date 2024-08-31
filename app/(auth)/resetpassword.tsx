@@ -199,8 +199,11 @@ const ResetPassword = () => {
                             text1: "Success",
                             text2: "Password Changed",
                             type: "success",
+
+                            onHide: () => {
+                              router.push("/login");
+                            },
                           });
-                          router.push("/login");
                         });
                       } else if (step === 1 && !password) {
                         setPasswordError("Provide Password");

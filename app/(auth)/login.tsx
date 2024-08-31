@@ -182,12 +182,12 @@ const Login = () => {
                             type: "success",
                             text1: "Welcome",
                             text2: "You have successfully logged in",
+                            onHide: () => {
+                              router.push("/dashboard");
+                            },
                           });
                           setUser(user);
                           setPending(false);
-                          setTimeout(() => {
-                            router.push("/dashboard");
-                          }, 500);
                         })
                         .catch((e) => {
                           console.log(e);

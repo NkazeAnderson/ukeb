@@ -7,7 +7,10 @@ const useToast = ({
   text1,
   text2,
   type,
-}: Required<Pick<ToastShowParams, "text1" | "text2" | "type">>) => {
+  onHide,
+}: Required<Pick<ToastShowParams, "text1" | "text2" | "type">> & {
+  onHide?: () => void;
+}) => {
   return Toast.show({
     text1,
     text2,
@@ -20,6 +23,10 @@ const useToast = ({
       fontFamily: "regular",
       fontSize: 14,
       color: colors.black,
+    },
+    visibilityTime: 2000,
+    onHide: () => {
+      onHide && onHide();
     },
   });
 };

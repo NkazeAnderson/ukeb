@@ -377,7 +377,7 @@ const DashboardMain = () => {
                       </View>
                     </View>
                   ) : (
-                    <>
+                    <View>
                       <Text className="font-medium text-18 text-white">
                         {transaction.sender === user.$id &&
                         transaction.status === "completed"
@@ -405,12 +405,13 @@ const DashboardMain = () => {
                       <Text className="font-regular text-16 text-white">
                         Purpose: {transaction.purpose}
                       </Text>
+
                       <View className="flex flex-row justify-end items-center ">
                         <Text className="text-end text-gray-text">{`${
                           transaction.date.split("T")[0]
                         }`}</Text>
                       </View>
-                    </>
+                    </View>
                   )}
 
                   {transaction.status === "pending" &&

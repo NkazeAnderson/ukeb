@@ -4,6 +4,7 @@ import {
   TextInput,
   TextInputProps,
   KeyboardAvoidingView,
+  Pressable,
 } from "react-native";
 import React, { useRef } from "react";
 interface propsT extends TextInputProps {
@@ -20,6 +21,7 @@ const InputComponent = ({
   setError,
   whiteBg,
   value,
+  children,
   ...rest
 }: propsT) => {
   const inputRef = useRef<TextInput | null>(null);
@@ -27,14 +29,13 @@ const InputComponent = ({
   return (
     <View className="space-y-2 py-1">
       {label && (
-        <Text
+        <Pressable
           onPress={() => {
             inputRef.current && inputRef.current.focus();
           }}
-          className="font-medium text-16 text-primary"
         >
-          {label}
-        </Text>
+          <Text className="font-medium text-16 text-primary">{label}</Text>
+        </Pressable>
       )}
       <KeyboardAvoidingView>
         <TextInput
@@ -47,10 +48,10 @@ const InputComponent = ({
           }}
           {...rest}
         />
+        {error && (
+          <Text className=" text-danger font-regular text-[14px]">{error}</Text>
+        )}
       </KeyboardAvoidingView>
-      {error && (
-        <Text className=" text-danger font-regular text-[14px]">{error}</Text>
-      )}
     </View>
   );
 };

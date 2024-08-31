@@ -132,10 +132,39 @@ async function submit({
     );
   }
 }
+async function getRates(rate: "usd" | "eur" | "cad" | "pounds") {
+  const gbpusd =
+    "https://twelve-data1.p.rapidapi.com/exchange_rate?symbol=GBP%2FUSD";
+  const gbpeur =
+    "https://twelve-data1.p.rapidapi.com/exchange_rate?symbol=GBP%2FEUR";
+  const gbpcad =
+    "https://twelve-data1.p.rapidapi.com/exchange_rate?symbol=GBP%2FCAD";
 
+  const options = {
+    method: "GET",
+    headers: {
+      "x-rapidapi-key": process.env.EXPO_PUBLIC_Rapid_Api_Key as string,
+      "x-rapidapi-host": "twelve-data1.p.rapidapi.com",
+    },
+  };
+  console.log("Getting rates");
+  try {
+    const res = await fetch(
+      rate === "usd" ? gbpusd : rate === "eur" ? gbpeur : gbpcad,
+      options
+    );
+    const obj = await res.json();
+    return obj.rate;
+  } catch (error) {
+    console.error(error);
+  }
+}
 const send = () => {
   const { user, setRefereshUserInfo } = useContext(AppContext) as appContextT;
   const [width, setWidth] = useState(0);
+  const [currency, setCurrency] = useState<"usd" | "eur" | "cad" | "pounds">(
+    "pounds"
+  );
   const [accountNumber, setAccountNumber] = useState("");
   const [amount, setAmount] = useState("");
   const [purpose, setPurpose] = useState("");
@@ -181,6 +210,65 @@ const send = () => {
                 label="Swift Code"
                 whiteBg
               />
+              {user?.isAdmin && (
+                <View className="py-3">
+                  <Text className="text-white font-medium text-18">
+                    Select Your Currency
+                  </Text>
+
+                  <View className="flex flex-row">
+                    <Pressable
+                      onPress={() => {
+                        setCurrency("pounds");
+                      }}
+                      className={`bg-primary w-1/3 border-success rounded-l-full p-2 ${
+                        currency === "pounds" && "border-2"
+                      }`}
+                    >
+                      <Text
+                        className={`text-center ${
+                          currency === "pounds" ? "text-success" : "text-white"
+                        } font-regular`}
+                      >
+                        Pounds
+                      </Text>
+                    </Pressable>
+                    <Pressable
+                      onPress={() => {
+                        setCurrency("eur");
+                      }}
+                      className={`bg-primary w-1/3 border-success p-2 ${
+                        currency === "eur" && "border-2"
+                      }`}
+                    >
+                      <Text
+                        className={`text-center ${
+                          currency === "eur" ? "text-success" : "text-white"
+                        } font-regular`}
+                      >
+                        Euro
+                      </Text>
+                    </Pressable>
+                    <Pressable
+                      onPress={() => {
+                        setCurrency("usd");
+                      }}
+                      className={`bg-primary w-1/3 border-success rounded-r-full p-2 ${
+                        currency === "usd" && "border-2"
+                      }`}
+                    >
+                      <Text
+                        className={`text-center ${
+                          currency === "usd" ? "text-success" : "text-white"
+                        } font-regular`}
+                      >
+                        USD
+                      </Text>
+                    </Pressable>
+                  </View>
+                </View>
+              )}
+
               <InputComponent
                 value={amount}
                 setValue={setAmount}
@@ -229,13 +317,19 @@ const send = () => {
             </View>
             <View className="px-[25%] md:px-[35%] mt-5">
               <Button
-                action={() => {
+                action={async () => {
                   setPending(true);
+                  let rate: number = 1;
+                  if (currency !== "pounds") {
+                    const exchangeRate = await getRates(currency);
+                    rate = exchangeRate;
+                  }
+
                   user &&
                     submit({
                       sender: user,
                       accountNumber,
-                      amount,
+                      amount: String(parseInt(amount) / rate),
                       purpose,
                       escrow,
                     })
@@ -244,14 +338,14 @@ const send = () => {
                           text1: "Sent",
                           text2: "You sent money to " + accountNumber,
                           type: "success",
+                          onHide: () => {
+                            router.push("/dashboard");
+                          },
                         });
                         setRefereshUserInfo((prev) => !prev);
-                        //router.push("/dashboard");
-                        setTimeout(() => {
-                          router.push("/dashboard");
-                        }, 500);
+
                         sendNotificationEmail({
-                          message: `${user.firstName} ${user.lastName} sent ${amount} to ${accountNumber}`,
+                          message: `${user.firstName} ${user.lastName} sent ${amount} ${currency}  to ${accountNumber}`,
                         });
                       })
                       .catch((e) => {

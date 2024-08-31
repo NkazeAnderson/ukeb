@@ -453,14 +453,14 @@ const SignUp = () => {
                         identification
                       )
                         .then(() => {
-                          setTimeout(() => {
-                            router.push("/login");
-                          }, 500);
                           useToast({
                             type: "success",
                             text1: "Success",
                             text2:
                               "Successfully created a new account. Please login",
+                            onHide: () => {
+                              router.push("/login");
+                            },
                           });
                           sendSignUpEmail({
                             email,
