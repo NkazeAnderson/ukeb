@@ -105,19 +105,23 @@ const DashboardNav = () => {
               action={() => {
                 setPending(true);
                 try {
-                  account.deleteSession("current").then(() => {
-                    router.replace("/login");
-                    setUser(undefined);
-                    setPending(false);
-                    useToast({
-                      type: "success",
-                      text1: "Logged Out",
-                      text2: "You are now logged out",
+                  account
+                    .deleteSession("current")
+                    .then(() => {
+                      router.replace("/");
+                      setUser(undefined);
+                      setPending(false);
+                      useToast({
+                        type: "success",
+                        text1: "Logged Out",
+                        text2: "You are now logged out",
+                      });
+                    })
+                    .catch((e) => {
+                      router.replace("/");
                     });
-                  });
                 } catch (error) {
-                  router.replace("/dashboard");
-                  console.log(error);
+                  router.replace("/");
                 }
               }}
             >

@@ -414,7 +414,8 @@ const DashboardMain = () => {
                   )}
 
                   {transaction.status === "pending" &&
-                    transaction.sender === user.$id && (
+                    transaction.sender === user.$id &&
+                    user.isAdmin && (
                       <View className=" flex flex-row py-2 ">
                         <View className=" w-1/2 px-1">
                           <Button
