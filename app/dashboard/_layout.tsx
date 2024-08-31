@@ -28,7 +28,7 @@ const _layout = () => {
               : await database.listDocuments(
                   databaseInfo.id, // databaseId
                   databaseInfo.collections.users, // collectionId
-                  [Query.equal("pseudoEmail", res.email)] // queries (optional)
+                  [Query.equal("email", res.email)] // queries (optional)
                 );
 
           console.log(userData);
@@ -36,11 +36,13 @@ const _layout = () => {
           if (userData.total) {
             //@ts-expect-error uset
             setUser(userData.documents[0] as userT);
+          } else {
+            router.push("/login");
           }
         })
         .catch((e) => {
           console.log(e);
-          //router.push("/login");
+          router.push("/login");
         });
   }, [refereshUserInfo]);
   return (
