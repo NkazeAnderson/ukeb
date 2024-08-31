@@ -187,7 +187,7 @@ const Login = () => {
                           setPending(false);
                           setTimeout(() => {
                             router.push("/dashboard");
-                          }, 100);
+                          }, 500);
                         })
                         .catch((e) => {
                           console.log(e);

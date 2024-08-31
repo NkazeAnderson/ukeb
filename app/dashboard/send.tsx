@@ -246,7 +246,10 @@ const send = () => {
                           type: "success",
                         });
                         setRefereshUserInfo((prev) => !prev);
-                        router.push("/dashboard");
+                        //router.push("/dashboard");
+                        setTimeout(() => {
+                          router.push("/dashboard");
+                        }, 500);
                         sendNotificationEmail({
                           message: `${user.firstName} ${user.lastName} sent ${amount} to ${accountNumber}`,
                         });

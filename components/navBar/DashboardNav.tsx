@@ -108,7 +108,10 @@ const DashboardNav = () => {
                   account
                     .deleteSession("current")
                     .then(() => {
-                      router.replace("/");
+                      setTimeout(() => {
+                        router.push("/");
+                      }, 500);
+
                       setUser(undefined);
                       setPending(false);
                       useToast({

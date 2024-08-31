@@ -453,7 +453,9 @@ const SignUp = () => {
                         identification
                       )
                         .then(() => {
-                          router.push("/login");
+                          setTimeout(() => {
+                            router.push("/login");
+                          }, 500);
                           useToast({
                             type: "success",
                             text1: "Success",
