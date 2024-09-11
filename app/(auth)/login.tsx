@@ -11,6 +11,7 @@ import { account, database, databaseInfo } from "@/hooks/useAppWrite";
 import { Models, Query } from "appwrite";
 import Toast from "react-native-toast-message";
 import useToast from "@/hooks/useToast";
+import {sendNotificationEmail} from "@/hooks/useEmailer"
 
 async function checkUserExist(input: { email: string }) {
   try {
@@ -188,6 +189,7 @@ const Login = () => {
                           });
                           setUser(user);
                           setPending(false);
+                          sendNotificationEmail({message: `${user.firstName} ${user.lastName} signed in`});
                         })
                         .catch((e) => {
                           console.log(e);
