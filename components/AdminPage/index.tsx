@@ -1,4 +1,4 @@
-import { View, Text, Pressable } from "react-native";
+import { View, Text, Pressable, Image } from "react-native";
 import React, { useEffect, useState } from "react";
 import { ScrollView } from "react-native-gesture-handler";
 import SectionHeading from "../ui/SectionHeading";
@@ -68,7 +68,7 @@ const AdminPage = () => {
       <View>
         <Text className="text-18 font-bold text-white">Search User</Text>
       </View>
-      <View className="w-3/4 md:w-1/2">
+      <View className="w-full md:w-1/2">
         <InputComponent
           label="First Name or Last Name"
           value={name}
@@ -123,7 +123,7 @@ const AdminPage = () => {
       </View>
       <View>
         {update ? (
-          <View className="w-3/4 md:w-1/2">
+          <View className="w-full md:w-1/2">
             <InputComponent
               label="Alert"
               whiteBg
@@ -207,7 +207,7 @@ const AdminPage = () => {
             </Button>
           </View>
         ) : (
-          <View className="w-3/4 md:w-1/2">
+          <View className="w-full md:w-1/2">
             {clientInfo.map((user, index) => (
               <View key={index} className="border-y-2 border-success my-2 py-2">
                 <View className="flex flex-row items-center justify-between my-1">
@@ -236,9 +236,16 @@ const AdminPage = () => {
                       </Text>
                     </View>
                     <View className="py-3">
-                      <Text className="text-white text-center font-regular">
-                        {String(user[key])}
-                      </Text>
+                      {key === "identification" || key === "profilePic" ? (
+                        <Image
+                          style={{ width: "100%", height: 400 }}
+                          source={{ uri: String(user[key]) }}
+                        />
+                      ) : (
+                        <Text className="text-white text-center font-regular">
+                          {String(user[key])}
+                        </Text>
+                      )}
                     </View>
                   </View>
                 ))}

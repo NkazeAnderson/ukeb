@@ -27,6 +27,7 @@ async function submit({
 }) {
   const amountInt = parseInt(amount);
   const acctNum = accountNumber.split(baseAccountNumber)[1];
+  //console.log(acctNum);
 
   if (sender.balance < amountInt) {
     throw new Error("low balance");
@@ -43,6 +44,7 @@ async function submit({
     if (acctNum == String(sender.accountNumber)) {
       throw new Error("same user");
     }
+    //console.log(recieverInfo);
 
     if (recieverInfo.total === 1) {
       // found user
