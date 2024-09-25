@@ -1,4 +1,4 @@
-const nodemailer = require("nodemailer");
+import * as nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
   host: "smtp.hostinger.com",
@@ -11,7 +11,7 @@ const transporter = nodemailer.createTransport({
 });
 
 // async..await is not allowed in global scope, must use a wrapper
-export default async function ({ req, res, log, error }) {
+export default async ({ req, res, log, error }) => {
   // send mail with defined transport object
   const { email, type, name } = req.bodyJson;
   log(email);
@@ -30,4 +30,4 @@ export default async function ({ req, res, log, error }) {
   }
 
   // Message sent: <d786aa62-4e0a-070a-47ed-0b0666549519@ethereal.email>
-}
+};
