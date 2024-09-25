@@ -5,7 +5,7 @@ import {
 } from "@react-navigation/native";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import "react-native-reanimated";
 import Head from "expo-router/head";
 import "@/assets/styles/tailwind.css";
@@ -79,6 +79,7 @@ function getRates() {
 }
 
 export default function RootLayout() {
+  const googleTranslateRef = useRef(null);
   const [loaded] = useFonts({
     light: Poppins_300Light,
     regular: Poppins_400Regular,
@@ -86,6 +87,7 @@ export default function RootLayout() {
     medium: Poppins_500Medium,
     bold: Poppins_700Bold,
   });
+
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
@@ -103,6 +105,32 @@ export default function RootLayout() {
         getRates();
       }
     });
+    let intervalId: undefined | number | NodeJS.Timeout = undefined;
+    const checkGoogleTranslate = () => {
+      if (
+        //@ts-ignore
+        window.google &&
+        //@ts-ignore
+        window.google.translate &&
+        //@ts-ignore
+        window.google.translate.TranslateElement.InlineLayout
+      ) {
+        clearInterval(intervalId);
+        //@ts-ignore
+        new window.google.translate.TranslateElement(
+          {
+            pageLanguage: "en",
+            includedLanguages:
+              "af,ach,ak,am,ar,az,be,bem,bg,bh,bn,br,bs,ca,chr,ckb,co,crs,cs,cy,da,de,ee,el,en,eo,es,es-419,et,eu,fa,fi,fo,fr,fy,ga,gaa,gd,gl,gn,gu,ha,haw,hi,hr,ht,hu,hy,ia,id,ig,is,it,iw,ja,jw,ka,kg,kk,km,kn,ko,kri,ku,ky,la,lg,ln,lo,loz,lt,lua,lv,mfe,mg,mi,mk,ml,mn,mo,mr,ms,mt,ne,nl,nn,no,nso,ny,nyn,oc,om,or,pa,pcm,pl,ps,pt-BR,pt-PT,qu,rm,rn,ro,ru,rw,sd,sh,si,sk,sl,sn,so,sq,sr,sr-ME,st,su,sv,sw,ta,te,tg,th,ti,tk,tl,tn,to,tr,tt,tum,tw,ug,uk,ur,uz,vi,wo,xh,yi,yo,zh-CN,zh-TW,zu",
+            layout:
+              //@ts-ignore
+              window.google.translate.TranslateElement.InlineLayout.VERTICAL,
+          },
+          googleTranslateRef.current
+        );
+      }
+    };
+    intervalId = setInterval(checkGoogleTranslate, 100);
   }, []);
 
   if (!loaded) {
@@ -124,6 +152,7 @@ export default function RootLayout() {
         </GestureHandlerRootView>
       </AppContextProvider>
       <Toast />
+      <View ref={googleTranslateRef}></View>
     </View>
   );
 }
