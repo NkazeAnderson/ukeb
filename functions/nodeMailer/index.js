@@ -1,4 +1,4 @@
-import * as nodemailer from "nodemailer";
+const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
   host: "smtp.hostinger.com",
