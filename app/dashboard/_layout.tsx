@@ -13,38 +13,7 @@ const _layout = () => {
     AppContext
   ) as appContextT;
   const router = useRouter();
-  useEffect(() => {
-    !user &&
-      account
-        .get()
-        .then(async (res) => {
-          const userData: Models.DocumentList<Models.Document> =
-            res.email.split("@")[1] === "ukmb.com"
-              ? await database.listDocuments(
-                  databaseInfo.id, // databaseId
-                  databaseInfo.collections.users, // collectionId
-                  [Query.equal("pseudoEmail", res.email)] // queries (optional)
-                )
-              : await database.listDocuments(
-                  databaseInfo.id, // databaseId
-                  databaseInfo.collections.users, // collectionId
-                  [Query.equal("email", res.email)] // queries (optional)
-                );
 
-          console.log(userData);
-
-          if (userData.total) {
-            //@ts-expect-error uset
-            setUser(userData.documents[0] as userT);
-          } else {
-            router.push("/login");
-          }
-        })
-        .catch((e) => {
-          console.log(e);
-          router.push("/login");
-        });
-  }, [refereshUserInfo]);
   return (
     <View className="flex flex-1 bg-background relative ">
       <SafeAreaView className="h-full">

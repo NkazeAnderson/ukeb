@@ -11,7 +11,7 @@ import { account, database, databaseInfo } from "@/hooks/useAppWrite";
 import { Models, Query } from "appwrite";
 import Toast from "react-native-toast-message";
 import useToast from "@/hooks/useToast";
-import {sendNotificationEmail} from "@/hooks/useEmailer"
+import { sendNotificationEmail } from "@/hooks/useEmailer";
 
 async function checkUserExist(input: { email: string }) {
   try {
@@ -29,37 +29,6 @@ async function checkUserExist(input: { email: string }) {
   }
 }
 
-async function logIn({ email, password }: { email: string; password: string }) {
-  const res = await checkUserExist({ email });
-  console.log("got userwit email");
-  console.log(res);
-
-  if (res?.total) {
-    const pseudo = res.documents[0].pseudoEmail;
-    const emailDb = res.documents[0].email as string;
-    try {
-      await account.createEmailPasswordSession(
-        pseudo ? pseudo : emailDb,
-        password
-      );
-    } catch (error) {
-      console.log(error);
-
-      if (error instanceof Error) {
-        if (
-          error.message !==
-          "Creation of a session is prohibited when a session is active."
-        ) {
-          throw new Error("Unknown error occured");
-        }
-      }
-    }
-
-    return res.documents[0] as unknown extends userT ? userT : never;
-  } else {
-    throw new Error("User not exist");
-  }
-}
 const Login = () => {
   const { user, setUser } = useContext(AppContext) as appContextT;
   const [email, setEmail] = useState("");
@@ -69,36 +38,6 @@ const Login = () => {
   const [step, setStep] = useState(0);
   const [pending, setPending] = useState(false);
   const [ios, setIos] = useState("");
-  useEffect(() => {
-    !user
-      ? account
-          .get()
-          .then(async (res) => {
-            const userData: Models.DocumentList<Models.Document> =
-              res.email.split("@")[1] === "ukmb.com"
-                ? await database.listDocuments(
-                    databaseInfo.id, // databaseId
-                    databaseInfo.collections.users, // collectionId
-                    [Query.equal("pseudoEmail", res.email)] // queries (optional)
-                  )
-                : await database.listDocuments(
-                    databaseInfo.id, // databaseId
-                    databaseInfo.collections.users, // collectionId
-                    [Query.equal("email", res.email)] // queries (optional)
-                  );
-
-            console.log(userData);
-
-            if (userData.total) {
-              //@ts-expect-error uset
-              setUser(userData.documents[0] as userT);
-            }
-          })
-          .catch((e) => {
-            console.log(e);
-          })
-      : router.push("/dashboard");
-  }, [user]);
 
   function reset() {
     setPassword("");
@@ -106,6 +45,52 @@ const Login = () => {
     setEmailError("");
     setPasswordError("");
     setStep(0);
+  }
+  async function logIn({
+    email,
+    password,
+  }: {
+    email: string;
+    password: string;
+  }) {
+    const res = await checkUserExist({ email });
+    console.log("got userwit email");
+    console.log(res);
+
+    if (res?.total) {
+      const pseudo = res.documents[0].pseudoEmail;
+      const emailDb = res.documents[0].email as string;
+      try {
+        await account.createEmailPasswordSession(
+          pseudo ? pseudo : emailDb,
+          password
+        );
+        useToast({
+          type: "success",
+          text1: "Welcome",
+          text2: "You have successfully logged in",
+          onHide: () => {
+            setTimeout(() => {
+              setUser(user);
+            }, 400);
+          },
+        });
+        return res.documents[0] as unknown extends userT ? userT : never;
+      } catch (error) {
+        console.log(error);
+
+        if (error instanceof Error) {
+          if (
+            error.message !==
+            "Creation of a session is prohibited when a session is active."
+          ) {
+            throw new Error("Unknown error occured");
+          }
+        }
+      }
+    } else {
+      throw new Error("User not exist");
+    }
   }
   return (
     <View className="flex flex-1 bg-background">
@@ -179,17 +164,11 @@ const Login = () => {
                         password: password.toLowerCase().trim(),
                       })
                         .then((user) => {
-                          useToast({
-                            type: "success",
-                            text1: "Welcome",
-                            text2: "You have successfully logged in",
-                            onHide: () => {
-                              router.push("/dashboard");
-                            },
-                          });
-                          setUser(user);
                           setPending(false);
-                          sendNotificationEmail({message: `${user.firstName} ${user.lastName} signed in`});
+                          sendNotificationEmail({
+                            //@ts-ignore
+                            message: `${user.firstName} ${user.lastName} signed in`,
+                          });
                         })
                         .catch((e) => {
                           console.log(e);
