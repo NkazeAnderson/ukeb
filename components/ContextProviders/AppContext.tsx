@@ -46,8 +46,6 @@ const AppContextProvider = ({ children }: { children: React.ReactNode }) => {
                   [Query.equal("email", res.email)] // queries (optional)
                 );
 
-          console.log(userData);
-
           if (userData.total) {
             //@ts-expect-error uset
             setUser(userData.documents[0] as userT);
@@ -62,7 +60,7 @@ const AppContextProvider = ({ children }: { children: React.ReactNode }) => {
           router.replace("/login");
         });
     }
-  }, [user]);
+  }, [user, path]);
   return (
     <AppContext.Provider
       value={{

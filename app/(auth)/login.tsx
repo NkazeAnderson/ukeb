@@ -71,8 +71,9 @@ const Login = () => {
           text2: "You have successfully logged in",
           onHide: () => {
             setTimeout(() => {
-              setUser(user);
-            }, 400);
+              //@ts-ignore
+              setUser(res.documents[0]);
+            }, 1000);
           },
         });
         return res.documents[0] as unknown extends userT ? userT : never;
@@ -84,7 +85,8 @@ const Login = () => {
             error.message !==
             "Creation of a session is prohibited when a session is active."
           ) {
-            throw new Error("Unknown error occured");
+            //@ts-ignore
+            setUser(res.documents[0]);
           }
         }
       }
