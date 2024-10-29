@@ -27,7 +27,7 @@ const AppContextProvider = ({ children }: { children: React.ReactNode }) => {
         router.push("/dashboard");
       }
     } else {
-      account
+      (path === "/dashboard" || path === "/login" ) && account
         .get()
         .then(async (res) => {
           console.log(res);
@@ -57,7 +57,7 @@ const AppContextProvider = ({ children }: { children: React.ReactNode }) => {
         })
         .catch((e) => {
           console.log(e);
-          router.replace("/login");
+          path === "/dashboard" && router.replace("/login");
         });
     }
   }, [user, path]);
