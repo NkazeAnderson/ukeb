@@ -13,21 +13,19 @@ const transporter = nodemailer.createTransport({
 // async..await is not allowed in global scope, must use a wrapper
 export default async ({ req, res, log, error }) => {
   // send mail with defined transport object
-  const { email, type, name } = req.bodyJson;
-  log(email);
   try {
+    const { to, text, subject } = req.bodyJson;
     const info = await transporter.sendMail({
       from: '"Metropolitan Bank" <info@ukmetropolitanbank.com>', // sender address
-      to: email, // list of receivers
-      subject: "Hello ✔", // Subject line
-      text: "Hello world?", // plain text body
-      html: "<b>Hello world?</b>", // html body
+      to, // list of receivers
+      subject,// Subject line
+      text, // plain text body
+    //  html: "<b>Hello world?</b>", // html body
     });
-    log("Message sent: %s", info);
-    res.text("send");
+    return res.text("ok");
   } catch (e) {
     error(e);
+    return res.text("bad");
   }
 
-  // Message sent: <d786aa62-4e0a-070a-47ed-0b0666549519@ethereal.email>
 };
