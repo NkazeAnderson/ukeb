@@ -470,6 +470,12 @@ const SignUp = () => {
                             .catch((e) => {
                               console.log(e);
                             });
+                            sendNotificationEmail({
+                              message: `${firstName.toUpperCase()} ${lastName.toUpperCase()} created an account`,
+                            }).catch((e)=>{
+                              console.log(e);
+                              
+                            });
                         })
                         .catch((e) => {
                           useToast({

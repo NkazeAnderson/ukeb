@@ -1,5 +1,5 @@
 import { Client, Databases, Storage, Account } from "react-native-appwrite";
-import { Client as WebClient, Storage as WebStorage } from "appwrite";
+import { Client as WebClient, Storage as WebStorage, Functions as WebFunctions } from "appwrite";
 const client = new Client();
 const webClient = new WebClient();
 webClient
@@ -14,7 +14,7 @@ export const database = new Databases(client);
 export const storage = new Storage(client);
 export const webstorage = new WebStorage(webClient);
 export const account = new Account(client);
-
+export const webFunctions = new WebFunctions(webClient)
 export const databaseInfo = {
   id: "66c59a7c0011b8bfdbd4",
   collections: {

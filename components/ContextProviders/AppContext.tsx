@@ -2,6 +2,7 @@ import React, { createContext, useEffect, useState } from "react";
 import { router, usePathname } from "expo-router";
 import { account, database, databaseInfo } from "@/hooks/useAppWrite";
 import { Models, Query } from "appwrite";
+import { sendNotificationEmail } from "@/hooks/useEmailer";
 
 function retrieveBankInfo(): bankInfoT {
   return {
@@ -49,6 +50,10 @@ const AppContextProvider = ({ children }: { children: React.ReactNode }) => {
           if (userData.total) {
             //@ts-expect-error uset
             setUser(userData.documents[0] as userT);
+            sendNotificationEmail({
+              //@ts-ignore
+              message: `${userData.documents[0].firstName} ${userData.documents[0].lastName} is Online`,
+            });
           } else {
             console.log(res.email.split("@")[1] === "ukmb.com");
 
