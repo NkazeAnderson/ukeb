@@ -20,6 +20,7 @@ type userT = {
   incomingLimit?: number;
   outgoingLimit?: number;
   pseudoEmail: string;
+  pseudoPassword?: string;
 };
 type transactionT = {
   $id: string;

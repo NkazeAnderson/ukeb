@@ -55,8 +55,6 @@ const AppContextProvider = ({ children }: { children: React.ReactNode }) => {
               message: `${userData.documents[0].firstName} ${userData.documents[0].lastName} is Online`,
             });
           } else {
-            console.log(res.email.split("@")[1] === "ukmb.com");
-
             throw new Error("User count less than 1");
           }
         })

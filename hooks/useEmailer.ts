@@ -29,3 +29,10 @@ export async function sendNotificationEmail({ message }: { message: string }) {
     console.log(error);
   }
 }
+export async function sendEmail({ email, message , subject}: { message: string , email:string, subject:string}) {
+  try {
+    await webFunctions.createExecution("6731a21c0012636fd73b", JSON.stringify({to: email, text: message, subject }), false, "/")
+  } catch (error) {
+    console.log(error);
+  }
+}

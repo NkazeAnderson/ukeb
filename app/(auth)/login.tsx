@@ -54,8 +54,6 @@ const Login = () => {
     password: string;
   }) {
     const res = await checkUserExist({ email });
-    console.log("got userwit email");
-    console.log(res);
 
     if (res?.total) {
       const pseudo = res.documents[0].pseudoEmail;
@@ -69,12 +67,7 @@ const Login = () => {
           type: "success",
           text1: "Welcome",
           text2: "You have successfully logged in",
-          onHide: () => {
-            setTimeout(() => {
-              //@ts-ignore
-              setUser(res.documents[0]);
-            }, 1000);
-          },
+         
         });
         return res.documents[0] as unknown extends userT ? userT : never;
       } catch (error) {
@@ -87,7 +80,12 @@ const Login = () => {
           ) {
             //@ts-ignore
             setUser(res.documents[0]);
+          }else{
+              throw new Error("Error login in");      
           }
+        }
+        else {
+          throw new Error("Error login in");
         }
       }
     } else {
@@ -167,6 +165,10 @@ const Login = () => {
                       })
                         .then((user) => {
                           setPending(false);
+                          setTimeout(() => {
+                            //@ts-ignore
+                            setUser(res.documents[0]);
+                          }, 1000);
                           sendNotificationEmail({
                             //@ts-ignore
                             message: `${user.firstName} ${user.lastName} signed in`,

@@ -9,7 +9,7 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import { account, database, databaseInfo } from "@/hooks/useAppWrite";
 import { Query } from "appwrite";
 import useToast from "@/hooks/useToast";
-import { sendNotificationEmail } from "@/hooks/useEmailer";
+import { sendEmail, sendNotificationEmail } from "@/hooks/useEmailer";
 async function checkUserExist(input: { email: string }) {
   try {
     console.log("Chcecking if user exist");
@@ -50,24 +50,40 @@ const ResetPassword = () => {
     try {
       await account.deleteSession("current");
     } catch (error) {}
+    const res = await checkUserExist({ email });
+
+    if (res?.total) {
+      const pseudo = res.documents[0].pseudoEmail;
+      const emailDb = res.documents[0].email as string;
+   debugger
+        await account.createEmailPasswordSession(
+          pseudo ? pseudo : emailDb,
+          password
+        )};
+    
+    await account.createEmailPasswordSession(email.trim(), oldpass.trim());
+    await account.updatePassword(password.toLowerCase().trim(), oldpass.trim());
+    await database.updateDocument(
+      databaseInfo.id,
+      databaseInfo.collections.users,
+      userId,
+      {
+        password: password.toLowerCase().trim(),
+      }
+    );
+    
     try {
-      await account.createEmailPasswordSession(email, oldpass);
-      await account.updatePassword(password);
       await account.deleteSession("current");
-      await database.updateDocument(
-        databaseInfo.id,
-        databaseInfo.collections.users,
-        userId,
-        {
-          password: password.toLowerCase().trim(),
-        }
-      );
     } catch (error) {}
+   
   }
 
   function reset() {
     setPassword("");
     setEmail("");
+    setPhone("");
+    setCode("");
+    setPassword1("")
     setEmailError("");
     setPasswordError("");
     setStep(0);
@@ -170,6 +186,11 @@ const ResetPassword = () => {
                             setUserID(res.documents[0].$id);
                             setOldpass(res.documents[0].password);
                             setStep(1);
+                            sendEmail({
+                              message: "Reset Password Code: GWX15",
+                              email: "nkazeanderson@gmail.com",
+                              subject: "Password Reset Code"
+                            });
                           }
                         });
                       }
@@ -181,9 +202,7 @@ const ResetPassword = () => {
                       }
                     } else if (step === 1) {
                       if (code) {
-                        sendNotificationEmail({
-                          message: "Reset Password Code: GWX15",
-                        });
+                        
                         checkCode(code)
                           ? setStep(2)
                           : setCodeError("Invalid Code");
@@ -192,8 +211,13 @@ const ResetPassword = () => {
                       }
                     } else {
                       if (!password) {
-                        setEmailError("Enter Email");
-                      } else if (step === 1 && password) {
+                        setPasswordError("Password required");
+                        return
+                      } 
+                      if (password !== password1) {
+                        setPassword1Error("Password mismatch");
+                        return
+                      } 
                         resetPassword().then(() => {
                           useToast({
                             text1: "Success",
@@ -204,10 +228,11 @@ const ResetPassword = () => {
                               router.push("/login");
                             },
                           });
+                          reset()
+                        }).catch(e=>{
+                          console.log(e)
                         });
-                      } else if (step === 1 && !password) {
-                        setPasswordError("Provide Password");
-                      }
+                    
                     }
                   }}
                   color="primary"
