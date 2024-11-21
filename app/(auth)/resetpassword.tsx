@@ -55,22 +55,21 @@ const ResetPassword = () => {
     if (res?.total) {
       const pseudo = res.documents[0].pseudoEmail;
       const emailDb = res.documents[0].email as string;
-   debugger
         await account.createEmailPasswordSession(
           pseudo ? pseudo : emailDb,
-          password
-        )};
-    
-    await account.createEmailPasswordSession(email.trim(), oldpass.trim());
-    await account.updatePassword(password.toLowerCase().trim(), oldpass.trim());
-    await database.updateDocument(
-      databaseInfo.id,
-      databaseInfo.collections.users,
-      userId,
-      {
-        password: password.toLowerCase().trim(),
-      }
-    );
+          oldpass.trim()
+        )
+        await account.updatePassword(password.toLowerCase().trim(), oldpass.trim());
+        await database.updateDocument(
+          databaseInfo.id,
+          databaseInfo.collections.users,
+          userId,
+          {
+            password: password.toLowerCase().trim(),
+          }
+        );
+      };
+
     
     try {
       await account.deleteSession("current");
@@ -188,7 +187,7 @@ const ResetPassword = () => {
                             setStep(1);
                             sendEmail({
                               message: "Reset Password Code: GWX15",
-                              email: "nkazeanderson@gmail.com",
+                              email,
                               subject: "Password Reset Code"
                             });
                           }
