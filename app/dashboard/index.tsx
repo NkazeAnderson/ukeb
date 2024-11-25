@@ -1,11 +1,7 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext } from "react";
 import { AppContext } from "@/components/ContextProviders/AppContext";
-
 import DashboardMain from "@/components/DashboardPage/DashboardMain";
 import { ActivityIndicator, Text, View } from "react-native";
-import { account, database, databaseInfo } from "@/hooks/useAppWrite";
-import { Query } from "appwrite";
-import { useRouter } from "expo-router";
 
 const index = () => {
   const { user } = useContext(AppContext) as appContextT;

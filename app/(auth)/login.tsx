@@ -12,22 +12,7 @@ import { Models, Query } from "appwrite";
 import Toast from "react-native-toast-message";
 import useToast from "@/hooks/useToast";
 import { sendNotificationEmail } from "@/hooks/useEmailer";
-
-async function checkUserExist(input: { email: string }) {
-  try {
-    console.log("Chcecking if user exist");
-
-    const res = await database.listDocuments(
-      databaseInfo.id,
-      databaseInfo.collections.users,
-      [Query.equal("email", input.email)]
-    );
-
-    return res;
-  } catch (error) {
-    console.log(error);
-  }
-}
+import { createAppWriteSession, getUserByEmail } from "@/utils/appwrite";
 
 const Login = () => {
   const { user, setUser } = useContext(AppContext) as appContextT;
@@ -53,44 +38,11 @@ const Login = () => {
     email: string;
     password: string;
   }) {
-    const res = await checkUserExist({ email });
-
-    if (res?.total) {
-      const pseudo = res.documents[0].pseudoEmail;
-      const emailDb = res.documents[0].email as string;
-      try {
-        await account.createEmailPasswordSession(
-          pseudo ? pseudo : emailDb,
-          password
-        );
-        useToast({
-          type: "success",
-          text1: "Welcome",
-          text2: "You have successfully logged in",
-         
-        });
-        return res.documents[0] as unknown extends userT ? userT : never;
-      } catch (error) {
-        console.log(error);
-
-        if (error instanceof Error) {
-          if (
-            error.message !==
-            "Creation of a session is prohibited when a session is active."
-          ) {
-            //@ts-ignore
-            setUser(res.documents[0]);
-          }else{
-              throw new Error("Error login in");      
-          }
-        }
-        else {
-          throw new Error("Error login in");
-        }
-      }
-    } else {
-      throw new Error("User not exist");
-    }
+    const userInfo = await getUserByEmail(email);
+    const pseudo = userInfo.pseudoEmail;
+    const emailDb = userInfo.email;
+    await createAppWriteSession({ email: emailDb, pseudo, password });
+    return userInfo;
   }
   return (
     <View className="flex flex-1 bg-background">
@@ -152,48 +104,60 @@ const Login = () => {
                 <Button
                   action={() => {
                     setPending(true);
-                    if (step === 0 && email) {
-                      setStep(1);
+                    if (step === 0) {
+                      email ? setStep(1) : setEmailError("Enter Email");
                       setPending(false);
-                    } else if (step === 0 && !email) {
-                      setEmailError("Enter Email");
-                      setPending(false);
-                    } else if (step === 1 && password) {
-                      logIn({
-                        email: email.toLowerCase().trim(),
-                        password: password.toLowerCase().trim(),
-                      })
-                        .then((user) => {
-                          setPending(false);
-                          setTimeout(() => {
-                            //@ts-ignore
-                            setUser(res.documents[0]);
-                          }, 1000);
-                          sendNotificationEmail({
-                            //@ts-ignore
-                            message: `${user.firstName} ${user.lastName} signed in`,
-                          });
-                        })
-                        .catch((e) => {
-                          console.log(e);
-                          if (e instanceof Error) {
-                            //setIos(e.message);
-                            if (e.message === "User not exist") {
+                    } else if (step === 1) {
+                      password
+                        ? logIn({
+                            email: email.toLowerCase().trim(),
+                            password: password.toLowerCase().trim(),
+                          })
+                            .then((user) => {
                               useToast({
-                                type: "error",
-                                text1: "Error logging in",
-                                text2: "Wrong credentials.",
+                                type: "success",
+                                text1: "Welcome",
+                                text2: "You have successfully logged in",
+                                onHide: () => {
+                                  setTimeout(() => {
+                                    setUser(user);
+                                  }, 100);
+                                },
                               });
-                            } else {
-                              useToast({
-                                type: "error",
-                                text1: "Error logging in",
-                                text2: "Connectivity or invalid credentials",
+                              sendNotificationEmail({
+                                //@ts-ignore
+                                message: `${user.firstName} ${user.lastName} signed in`,
                               });
-                            }
-                          }
-                          setPending(false);
-                        });
+                            })
+                            .catch((e) => {
+                              if (e instanceof Error) {
+                                if (e.message === "User not found") {
+                                  useToast({
+                                    type: "error",
+                                    text1: "Error logging in",
+                                    text2: "User not Found",
+                                  });
+                                } else if (e.message.includes("password")) {
+                                  useToast({
+                                    type: "error",
+                                    text1: "Error logging in",
+                                    text2: "Invalid credentials",
+                                  });
+                                } else {
+                                  useToast({
+                                    type: "error",
+                                    text1: "Error logging in",
+                                    text2:
+                                      "Connectivity or invalid credentials",
+                                  });
+                                }
+                              }
+                            })
+                            .finally(() => {
+                              setPending(false);
+                            })
+                        : setPasswordError("Enter password");
+                      !password && setPending(false);
                     }
                   }}
                   color="primary"
