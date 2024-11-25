@@ -164,7 +164,7 @@ const Login = () => {
                   textColor="white"
                   pending={pending}
                 >
-                  Continue
+                  {step === 0 ? "Continue" : "Log In"}
                 </Button>
               </View>
               <View className="flex flex-row space-x-2 items-center justify-end">

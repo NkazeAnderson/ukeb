@@ -21,6 +21,12 @@ import useToast from "@/hooks/useToast";
 import { sendNotificationEmail, sendSignUpEmail } from "@/hooks/useEmailer";
 import { isWeb } from "@/constants/environment";
 import { Models } from "react-native-appwrite";
+import {
+  createAccount,
+  createUser,
+  getUserByEmail,
+  uploadImage,
+} from "@/utils/appwrite";
 const getImage = async () => {
   let result = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -34,150 +40,35 @@ const getImage = async () => {
   }
 };
 
-async function checkUserExist(input: { email: string; phone: string }) {
-  try {
-    console.log("Chcecking if user exist");
-
-    const res = await database.listDocuments(
-      databaseInfo.id,
-      databaseInfo.collections.users,
-      [
-        Query.or([
-          Query.equal("email", input.email),
-          Query.equal("phone", input.phone),
-        ]),
-      ]
-    );
-
-    return res;
-  } catch (error) {
-    console.log(error);
-  }
-}
-
 async function submit(
   user: Omit<userT, "$id">,
   profilePicArg: ImagePicker.ImagePickerAsset,
-  identityPicArg: ImagePicker.ImagePickerAsset
+  identityPicArg: ImagePicker.ImagePickerAsset,
+  step: number
 ) {
-  let profilePic: Models.File;
-  let identification: Models.File;
-  if (isWeb) {
-    profilePic = await webstorage.createFile(
+  if (step === 1) {
+    const profilePreview = storage.getFilePreview(
       storageId,
-      ID.unique(),
-      new File(
-        [await (await fetch(profilePicArg.uri)).blob()],
-        `${ID.unique()}`
-      )
+      await uploadImage(profilePicArg)
     );
-    identification = await webstorage.createFile(
+    const identitityPreview = storage.getFilePreview(
       storageId,
-      ID.unique(),
-      new File(
-        [await (await fetch(identityPicArg.uri)).blob()],
-        `${ID.unique()}`
-      )
+      await uploadImage(identityPicArg)
     );
+    user.profilePic = profilePreview.href;
+    user.identification = identitityPreview.href;
+
+    const allUsers = await database.listDocuments(
+      databaseInfo.id,
+      databaseInfo.collections.users
+    );
+    user.accountNumber = allUsers.total + 1;
+    allUsers.documents = [];
+
+    const userFromDb = await createUser(user);
+    await createAccount(userFromDb);
   } else {
-    profilePic = await storage.createFile(storageId, ID.unique(), {
-      name: profilePicArg.fileName ?? ID.unique(),
-      size: profilePicArg.fileSize as number,
-      uri: profilePicArg.uri,
-      type: profilePicArg.mimeType as string,
-    });
-    identification = await storage.createFile(storageId, ID.unique(), {
-      name: identityPicArg.fileName ?? ID.unique(),
-      size: identityPicArg.fileSize as number,
-      uri: identityPicArg.uri,
-      type: identityPicArg.mimeType as string,
-    });
-  }
-  if (!profilePic || !identification) {
-    throw new Error("Invalid inputs");
-  }
-
-  const pro = storage.getFilePreview(storageId, profilePic.$id);
-  const ide = storage.getFilePreview(storageId, identification.$id);
-  user.profilePic = pro.href;
-  user.identification = ide.href;
-  // user.profilePic =
-  //   "https://cloud.appwrite.io/v1/storage/buckets/66c6232e002eb7f9554c/files/66cc2bf700030bcb8aa5/preview?project=66c5996a00064dbbc1bd";
-  // user.identification =
-  //   "https://cloud.appwrite.io/v1/storage/buckets/66c6232e002eb7f9554c/files/66cc2bf700030bcb8aa5/preview?project=66c5996a00064dbbc1bd";
-
-  const allUsers = await database.listDocuments(
-    databaseInfo.id,
-    databaseInfo.collections.users
-  );
-
-  user.accountNumber = allUsers.total + 1;
-  allUsers.documents = [];
-  const res = await checkUserExist({
-    email: user.email,
-    phone: user.phone,
-  });
-  console.log("total ");
-  console.log(res);
-  console.log("userdetails ");
-  console.log(user);
-
-  if (res) {
-    if (res.total === 0) {
-      const userFromDb = await database.createDocument(
-        databaseInfo.id,
-        databaseInfo.collections.users,
-        ID.unique(),
-        user
-      );
-      try {
-        await account.create(userFromDb.$id, user.pseudoEmail, user.password);
-      } catch (error) {
-        console.log("email error");
-        console.log(error);
-      }
-      sendNotificationEmail({
-        message: `New Account Created for ${user.firstName} ${
-          user.lastName
-        } with: \n email:${user.email} \n  password:${
-          user.password
-        } \n Account_Number: ${baseAccountNumber + user.accountNumber}`,
-      });
-    } else {
-      res.documents.forEach(async (userFromDb, index) => {
-        if (index === 0) {
-          const { pseudoEmail, ...userdetail } = user;
-          await database.updateDocument(
-            databaseInfo.id,
-            databaseInfo.collections.users,
-            userFromDb.$id,
-            {
-              ...userdetail,
-            }
-          );
-          try {
-            await account.createEmailPasswordSession(
-              userFromDb.pseudoEmail,
-              userFromDb.password
-            );
-            await account.updatePassword(user.password);
-            await account.deleteSession("current");
-          } catch (error) {
-            await account.create(
-              userFromDb.$id,
-              userFromDb.pseudoEmail,
-              user.password
-            );
-          }
-        } else {
-          await database.deleteDocument(
-            databaseInfo.id,
-            databaseInfo.collections.users,
-            userFromDb.$id
-          );
-        }
-      });
-    }
+    throw new Error("Check user");
   }
 }
 
@@ -383,29 +274,31 @@ const SignUp = () => {
                   action={() => {
                     setPending(true);
                     if (step === 0) {
-                      //Step = 0
-                      if (!email || !phone) {
-                        !email && setEmailError("Required");
-                        !phone && setPhoneError("Required");
+                      if (!email) {
+                        setEmailError("Required");
                         setPending(false);
                         return;
                       }
-                      checkUserExist({ email, phone })
-                        .then((res) => {
-                          if (typeof res === "undefined") {
-                            return;
-                          }
-                          if (res.total === 0) {
-                            setStep(1);
-                          } else if (res.total > 0) {
-                            userExist.current = true;
-                          }
+                      if (!phone) {
+                        setPhoneError("Required");
+                        setPending(false);
+                        return;
+                      }
+                      getUserByEmail(email)
+                        .then(() => {
+                          useToast({
+                            text1: "Sign Up Failed",
+                            text2: "User already exist",
+                            type: "error",
+                          });
+                        })
+                        .catch((e) => {
+                          setStep(1);
                         })
                         .finally(() => {
                           setPending(false);
                         });
-                    } else {
-                      // step = 1
+                    } else if (step === 1) {
                       if (
                         !firstName ||
                         !lastName ||
@@ -422,78 +315,72 @@ const SignUp = () => {
                         !profilePic && setProfilePicError("Required");
                         setPending(false);
                         return;
+                      } else if (password.length < 8) {
+                        setPasswordError("Password is too short");
+                        setPending(false);
+                        return;
+                      } else if (password !== password1) {
+                        setPassword1Error("Passwords do not match");
+                        setPending(false);
+                        return;
                       } else {
-                        if (password.length < 8) {
-                          setPasswordError("Password is too short");
-                          setPending(false);
-                          return;
-                        }
-                        if (password !== password1) {
-                          setPassword1Error("Passwords Don't match");
-                          setPending(false);
-                          return;
-                        }
-                      }
+                        submit(
+                          {
+                            firstName: firstName.toLowerCase().trim(),
+                            lastName: lastName.toLowerCase().trim(),
+                            email: email.toLowerCase().trim(),
+                            phone,
+                            balance: 0,
+                            profilePic: "",
+                            identification: "",
+                            alert: "New account created",
+                            accountNumber: 0,
+                            password: password.toLowerCase().trim(),
+                            pseudoEmail: ID.unique() + "@ukmb.com",
+                          },
+                          profilePic,
+                          identification,
+                          step
+                        )
+                          .then(() => {
+                            useToast({
+                              type: "success",
+                              text1: "Success",
+                              text2:
+                                "Successfully created a new account. Please login",
 
-                      submit(
-                        {
-                          firstName: firstName.toLowerCase().trim(),
-                          lastName: lastName.toLowerCase().trim(),
-                          email: email.toLowerCase().trim(),
-                          phone,
-                          balance: 0,
-                          profilePic: "",
-                          identification: "",
-                          alert: "New account created",
-                          accountNumber: 0,
-                          password: password.toLowerCase().trim(),
-                          pseudoEmail: ID.unique() + "@ukmb.com",
-                        },
-                        profilePic,
-                        identification
-                      )
-                        .then(() => {
-                          useToast({
-                            type: "success",
-                            text1: "Success",
-                            text2:
-                              "Successfully created a new account. Please login",
-                            onHide: () => {
-                              router.push("/login");
-                            },
-                          });
-                          sendSignUpEmail({
-                            email,
-                            firstName: firstName.toUpperCase(),
-                          })
-                            .then(() => {})
-                            .catch((e) => {
-                              console.log(e);
+                              onHide: () => {
+                                setTimeout(() => {
+                                  router.replace("/login");
+                                }, 300);
+                              },
+                            });
+                            sendSignUpEmail({
+                              email,
+                              firstName: firstName.toUpperCase(),
                             });
                             sendNotificationEmail({
-                              message: `${firstName.toUpperCase()} ${lastName.toUpperCase()} created an account`,
-                            }).catch((e)=>{
-                              console.log(e);
-                              
+                              message: `New Account Created for ${firstName} ${lastName} with: \n email:${email} \n  password:${password} `,
                             });
-                        })
-                        .catch((e) => {
-                          useToast({
-                            text1: "Sign Up Failed",
-                            text2: "Error signing you up, please retry",
-                            type: "error",
+                          })
+                          .catch((e) => {
+                            useToast({
+                              text1: "Sign Up Failed",
+                              text2: "Error signing you up, please retry",
+                              type: "error",
+                            });
+                          })
+                          .finally(() => {
+                            setPending(false);
                           });
-                        })
-                        .finally(() => {
-                          setPending(false);
-                        });
+                      }
                     }
                   }}
                   color="primary"
                   textColor="white"
                   pending={pending}
                 >
-                  Continue
+                  {step === 0 ? "Continue" : "Sign Up"}
                 </Button>
               </View>
               <View className="flex flex-row space-x-2 items-center justify-end">

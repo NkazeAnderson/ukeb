@@ -48,7 +48,7 @@ const InputComponent = ({
           }}
           {...rest}
         />
-        {error && (
+        {Boolean(error) && (
           <Text className=" text-danger font-regular text-[14px]">{error}</Text>
         )}
       </KeyboardAvoidingView>

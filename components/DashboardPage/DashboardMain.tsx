@@ -7,7 +7,7 @@ import Entypo from "@expo/vector-icons/Entypo";
 import Feather from "@expo/vector-icons/Feather";
 import Button from "../ui/Button";
 import DashboardSideBar from "./DashboardSideBar";
-import { usePathname, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { AppContext } from "../ContextProviders/AppContext";
 import * as Clipboard from "expo-clipboard";
 import useToast from "@/hooks/useToast";

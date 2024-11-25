@@ -38,6 +38,8 @@ export default function Root({ children }: PropsWithChildren) {
         {/* Add any additional <head> elements that you want globally available on web... */}
         <script
           type="text/javascript"
+          defer
+          async
           src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
         ></script>
       </head>
