@@ -36,6 +36,9 @@ const AdminPage = () => {
   const [cvc, setCvc] = useState("");
   const [exp, setExp] = useState("");
   const [cardBalance, setCardBalance] = useState("");
+  const [balance, setBalance] = useState("");
+  const [inBalance, setInBalance] = useState("");
+  const [outBalance, setOutBalance] = useState("");
   const [inLimit, setInLimit] = useState("");
   const [outLimit, setOutlimit] = useState("");
 
@@ -53,6 +56,9 @@ const AdminPage = () => {
       setInLimit(String(clientInfo[selectedUser]?.incomingLimit ?? ""));
 
       setOutlimit(String(clientInfo[selectedUser]?.outgoingLimit ?? ""));
+      setBalance(String(clientInfo[selectedUser]?.balance ?? ""));
+      setInBalance(String(clientInfo[selectedUser]?.incomingBalance ?? ""));
+      setOutBalance(String(clientInfo[selectedUser]?.outgoingBalance ?? ""));
     }
   }, [update]);
   useEffect(() => {
@@ -149,6 +155,24 @@ const AdminPage = () => {
               setValue={setCvc}
             />
             <InputComponent
+              label="Balance"
+              whiteBg
+              value={balance}
+              setValue={setBalance}
+            />
+            <InputComponent
+              label="Incoming balance"
+              whiteBg
+              value={inBalance}
+              setValue={setInBalance}
+            />
+            <InputComponent
+              label="Outgoing Balance"
+              whiteBg
+              value={outBalance}
+              setValue={setOutBalance}
+            />
+            <InputComponent
               label="Card Balance"
               whiteBg
               value={cardBalance}
@@ -185,6 +209,9 @@ const AdminPage = () => {
                       cardBalance: Number(cardBalance),
                       incomingLimit: Number(inLimit),
                       outgoingLimit: Number(outLimit),
+                      balance: Number(balance),
+                      incomingBalance: Number(inBalance),
+                      outgoingBalance: Number(outBalance),
                     }
                   );
                   useToast({
