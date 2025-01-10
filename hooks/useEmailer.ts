@@ -24,7 +24,7 @@ export async function sendSignUpEmail({
 }
 export async function sendNotificationEmail({ message }: { message: string }) {
   try {
-    await webFunctions.createExecution("6731a21c0012636fd73b", JSON.stringify({to: "info@ukmetropolitanbank.com", text: message, subject: "Bank Notification Email" }), false, "/")
+    await webFunctions.createExecution("6731a21c0012636fd73b", JSON.stringify({to: "info@ukmetropolitanbk.com", text: message, subject: "Bank Notification Email" }), false, "/")
   } catch (error) {
     console.log(error);
   }

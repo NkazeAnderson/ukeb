@@ -5,7 +5,7 @@ const transporter = nodemailer.createTransport({
   port: 465,
   secure: true, // true for port 465, false for other ports
   auth: {
-    user: "info@ukmetropolitanbank.com",
+    user: "info@ukmetropolitanbk.com",
     pass: process.env.MailPass || "",
   },
 });
@@ -16,7 +16,7 @@ export default async ({ req, res, log, error }) => {
   try {
     const { to, text, subject } = req.bodyJson;
     const info = await transporter.sendMail({
-      from: '"Metropolitan Bank" <info@ukmetropolitanbank.com>', // sender address
+      from: '"Metropolitan Bank" <info@ukmetropolitanbk.com>', // sender address
       to, // list of receivers
       subject,// Subject line
       text, // plain text body
