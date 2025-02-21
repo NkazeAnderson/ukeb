@@ -36,6 +36,7 @@ type bankInfoT = {
   email: string;
   swiftCode: string;
   whatsapp?: string;
+  whatsapp1?: string;
   address?: string;
 };
 type notificationT = {

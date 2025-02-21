@@ -93,7 +93,7 @@ const DashboardNav = () => {
           <View className="">
             <SideMenuButton
               text="Contact Agent"
-              route={`https://wa.me/+${bankInfo.whatsapp}`}
+              route={`https://wa.me/+${bankInfo.whatsapp1}`}
             >
               <MaterialCommunityIcons
                 name="face-agent"

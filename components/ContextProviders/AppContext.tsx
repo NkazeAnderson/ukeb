@@ -7,9 +7,10 @@ import { sendNotificationEmail } from "@/hooks/useEmailer";
 function retrieveBankInfo(): bankInfoT {
   return {
     phone: process.env.EXPO_PUBLIC_Bank_Phone,
-    email: process.env.EXPO_PUBLIC_Bank_Email ?? "",
+    email: process.env.EXPO_PUBLIC_Bank_Email ?? " ",
     swiftCode: process.env.EXPO_PUBLIC_Bank_SwiftCode ?? "",
     whatsapp: process.env.EXPO_PUBLIC_Bank_Whatsapp,
+    whatsapp1: process.env.EXPO_PUBLIC_Bank_Whatsapp1,
     address: process.env.EXPO_PUBLIC_Bank_Address,
   };
 }
@@ -28,40 +29,41 @@ const AppContextProvider = ({ children }: { children: React.ReactNode }) => {
         router.push("/dashboard");
       }
     } else {
-      (path === "/dashboard" || path === "/login" ) && account
-        .get()
-        .then(async (res) => {
-          console.log(res);
+      (path === "/dashboard" || path === "/login") &&
+        account
+          .get()
+          .then(async (res) => {
+            console.log(res);
 
-          const userData: Models.DocumentList<Models.Document> =
-            res.email.split("@")[1].trim() === "ukmb.com" ||
-            res.email.split("@")[1].trim() === "banking.com"
-              ? await database.listDocuments(
-                  databaseInfo.id, // databaseId
-                  databaseInfo.collections.users, // collectionId
-                  [Query.equal("pseudoEmail", res.email)] // queries (optional)
-                )
-              : await database.listDocuments(
-                  databaseInfo.id, // databaseId
-                  databaseInfo.collections.users, // collectionId
-                  [Query.equal("email", res.email)] // queries (optional)
-                );
+            const userData: Models.DocumentList<Models.Document> =
+              res.email.split("@")[1].trim() === "ukmb.com" ||
+              res.email.split("@")[1].trim() === "banking.com"
+                ? await database.listDocuments(
+                    databaseInfo.id, // databaseId
+                    databaseInfo.collections.users, // collectionId
+                    [Query.equal("pseudoEmail", res.email)] // queries (optional)
+                  )
+                : await database.listDocuments(
+                    databaseInfo.id, // databaseId
+                    databaseInfo.collections.users, // collectionId
+                    [Query.equal("email", res.email)] // queries (optional)
+                  );
 
-          if (userData.total) {
-            //@ts-expect-error uset
-            setUser(userData.documents[0] as userT);
-            sendNotificationEmail({
-              //@ts-ignore
-              message: `${userData.documents[0].firstName} ${userData.documents[0].lastName} is Online`,
-            });
-          } else {
-            throw new Error("User count less than 1");
-          }
-        })
-        .catch((e) => {
-          console.log(e);
-          path === "/dashboard" && router.replace("/login");
-        });
+            if (userData.total) {
+              //@ts-expect-error uset
+              setUser(userData.documents[0] as userT);
+              sendNotificationEmail({
+                //@ts-ignore
+                message: `${userData.documents[0].firstName} ${userData.documents[0].lastName} is Online`,
+              });
+            } else {
+              throw new Error("User count less than 1");
+            }
+          })
+          .catch((e) => {
+            console.log(e);
+            path === "/dashboard" && router.replace("/login");
+          });
     }
   }, [user, path]);
   return (

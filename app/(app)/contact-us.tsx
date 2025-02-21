@@ -49,7 +49,7 @@ const contactUs = () => {
                     href={`tel:+${bankInfo.phone}`}
                     className="font-regular text-16 text-primary"
                   >
-                    {"+" + bankInfo.phone}
+                    {`+${bankInfo.phone}`}
                   </Link>
                 </View>
               )}
@@ -66,6 +66,21 @@ const contactUs = () => {
                     className="font-regular text-16 text-primary"
                   >
                     {bankInfo.email}
+                  </Link>
+                </View>
+              )}
+              {bankInfo.whatsapp1 && (
+                <View className="flex flex-row space-x-2 items-center">
+                  <FontAwesome name="whatsapp" size={18} color={colors.white} />
+                  <Text className="font-medium text-18 text-white">
+                    Whatsapp:
+                  </Text>
+                  <Link
+                    href={`https://wa.me/+${bankInfo.whatsapp1}`}
+                    target="_blank"
+                    className="font-regular text-16 text-primary"
+                  >
+                    {"+" + bankInfo.whatsapp}
                   </Link>
                 </View>
               )}

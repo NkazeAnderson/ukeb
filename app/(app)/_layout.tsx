@@ -15,7 +15,7 @@ const _layout = () => {
       <Stack screenOptions={{ headerShown: false }} />
       <Pressable
         onPress={() => {
-          router.push(`https://wa.me/+${bankInfo.whatsapp}`);
+          router.push(`https://wa.me/+${bankInfo.whatsapp1}`);
         }}
         className="bg-success animate-bounce duration-[2000s] w-[50px] h-[50px] flex items-center justify-center rounded-full absolute right-6 bottom-6"
       >

