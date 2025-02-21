@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                                             // Required.
      appIconUrl: 'apple-touch-icon.png',                    // App icon link (square, at least 40 x 40 pixels).
                                                             // Required.
-
+     assetUrl: 'https://cdn.jsdelivr.net/gh/philfung/add-to-homescreen@2.991/dist/assets/img/', 
      maxModalDisplayCount: 2,                              // If set, the modal will only show this many times.
                                                             // [Optional] Default: -1 (no limit).  (Debugging: Use this.clearModalDisplayCount() to reset the count)
      displayOptions:{ showMobile: true, showDesktop: true }, // show on mobile/desktop [Optional] Default: show everywhere
