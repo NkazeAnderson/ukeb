@@ -80,7 +80,7 @@ const contactUs = () => {
                     target="_blank"
                     className="font-regular text-16 text-primary"
                   >
-                    {"+" + bankInfo.whatsapp}
+                    {"+" + bankInfo.whatsapp1}
                   </Link>
                 </View>
               )}
