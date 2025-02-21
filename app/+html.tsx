@@ -36,6 +36,7 @@ export default function Root({ children }: PropsWithChildren) {
 
         {/* Using raw CSS styles as an escape-hatch to ensure the background color never flickers in dark-mode. */}
         <style dangerouslySetInnerHTML={{ __html: responsiveBackground }} />
+        <script dangerouslySetInnerHTML={{ __html: sw }} />
         {/* Add any additional <head> elements that you want globally available on web... */}
         <script
           type="text/javascript"
@@ -58,3 +59,15 @@ body {
     background-color: #000;
   }
 }`;
+
+const sw = `
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').then(registration => {
+            console.log('Service Worker registered with scope:', registration.scope);
+        }).catch(error => {
+            console.error('Service Worker registration failed:', error);
+        });
+    });
+}
+`;
