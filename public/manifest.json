@@ -1,22 +1,23 @@
 {
     "short_name": "MetroBank",
     "name": "MetroBank UK",
+    "description": "Install our app to manage your finances quickly with our application",
     "icons": [
-      {
-        "src": "favicon.ico",
-        "sizes": "64x64 32x32 24x24 16x16",
-        "type": "image/x-icon"
-      },
-      {
-        "src": "ukeb-logo.png",
-        "type": "image/png",
-        "sizes": "192x192"
-      },
-      {
-        "src": "ukeb-logo1.png",
-        "type": "image/png",
-        "sizes": "512x512"
-      }
+        {"src":"/android-chrome-192x192.png","sizes":"192x192","type":"image/png"},{"src":"/android-chrome-512x512.png","sizes":"512x512","type":"image/png"}
+    ],
+    "screenshots": [
+    {
+     "src": "ukeb-wide.png",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Wonder Widgets"
+    },
+    {
+     "src": "ukeb-narrow.png",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Wonder Widgets"
+    }
     ],
     "start_url": ".",
     "display": "standalone",
