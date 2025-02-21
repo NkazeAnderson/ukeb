@@ -1,1 +1,29 @@
-{"theme_color":"#8936FF","background_color":"#06394c","icons":[{"purpose":"maskable","sizes":"512x512","src":"icon512_maskable.png","type":"image/png"},{"purpose":"any","sizes":"512x512","src":"icon512_rounded.png","type":"image/png"}],"orientation":"any","display":"standalone","dir":"auto","lang":"en-US","name":"MetroBank","short_name":"Metro Bank UK"}
+{
+    "short_name": "MetroBank",
+    "name": "MetroBank UK",
+    "description": "Install our app to anage your finances quickly with our application",
+    "icons": [
+        {"src":"/android-chrome-192x192.png","sizes":"192x192","type":"image/png"},{"src":"/android-chrome-512x512.png","sizes":"512x512","type":"image/png"}
+    ],
+    "screenshots": [
+    {
+     "src": "ukeb-wide.png",
+      "type": "image/png",
+      "form_factor": "wide",
+      "sizes":"1116x633",
+      "label": "Wonder Widgets"
+    },
+    {
+     "src": "ukeb-narrow.png",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "sizes":"353x498",
+      "label": "Wonder Widgets"
+    }
+    ],
+    "start_url": ".",
+    "display": "standalone",
+    "theme_color": "#000000",
+    "background_color": "#ffffff"
+  }
+  
