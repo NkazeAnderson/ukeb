@@ -15,7 +15,7 @@ const _layout = () => {
   const router = useRouter();
 
   return (
-    <View className="flex flex-1 bg-background relative ">
+    <View className="flex flex-1 bg-background relative pb-10">
       <SafeAreaView className="h-full">
         <View className=" flex flex-row h-full">
           <DashboardNav />

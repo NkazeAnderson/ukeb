@@ -5,7 +5,7 @@ import SectionHeading from "../ui/SectionHeading";
 import InputComponent from "../ui/InputComponent";
 import Button from "../ui/Button";
 import { database, databaseInfo } from "@/hooks/useAppWrite";
-import { Query } from "appwrite";
+import { ID, Query } from "appwrite";
 import { baseAccountNumber } from "@/constants/constants";
 import useToast from "@/hooks/useToast";
 async function getUser(name: string) {
@@ -41,6 +41,10 @@ const AdminPage = () => {
   const [outBalance, setOutBalance] = useState("");
   const [inLimit, setInLimit] = useState("");
   const [outLimit, setOutlimit] = useState("");
+  const [cardPaymentAmount, setCardPaymentAmount] = useState("");
+  const [cardPaymentDate, setCardPaymentDate] = useState("");
+  const [cardPaymentSuccess, setCardPaymentSuccess] = useState(true);
+  const [cardPaymentCompany, setCardPaymentCompany] = useState("");
 
   useEffect(() => {
     if (clientInfo[selectedUser]) {
@@ -172,12 +176,7 @@ const AdminPage = () => {
               value={outBalance}
               setValue={setOutBalance}
             />
-            <InputComponent
-              label="Card Balance"
-              whiteBg
-              value={cardBalance}
-              setValue={setCardBalance}
-            />
+
             <InputComponent
               label="Incoming Limit"
               whiteBg
@@ -232,6 +231,86 @@ const AdminPage = () => {
             >
               Submit
             </Button>
+
+            <View>
+              <Text className=" py-10 text-white text-32 font-semibold">
+                Add user card history
+              </Text>
+              <InputComponent
+                label="Company"
+                whiteBg
+                value={cardPaymentCompany}
+                setValue={setCardPaymentCompany}
+              />
+              <InputComponent
+                label="Amount"
+                whiteBg
+                value={cardPaymentAmount}
+                setValue={setCardPaymentAmount}
+              />
+
+              <InputComponent
+                label="Date"
+                whiteBg
+                value={cardPaymentDate}
+                setValue={setCardPaymentDate}
+              />
+
+              <Pressable
+                className="flex flex-row space-x-2 py-4 items-center"
+                onPress={() => {
+                  setCardPaymentSuccess(!cardPaymentSuccess);
+                }}
+              >
+                <View
+                  className={` w-4 h-4 border ${
+                    cardPaymentSuccess && "bg-success"
+                  }`}
+                ></View>
+                <Text className=" text-primary font-semibold text-20">
+                  Successful payment?
+                </Text>
+              </Pressable>
+
+              <Button
+                color="primary"
+                textColor="white"
+                pending={pending}
+                action={async () => {
+                  setPending(true);
+                  const data: Omit<cardTransactionT, "$id"> = {
+                    userId: String(clientInfo[selectedUser].$id),
+                    amount: Number(cardPaymentAmount),
+                    company: cardPaymentCompany,
+                    date: cardPaymentDate,
+                    successful: cardPaymentSuccess,
+                  };
+                  try {
+                    await database.createDocument(
+                      databaseInfo.id,
+                      databaseInfo.collections.cardTransactions,
+                      ID.unique(),
+                      data
+                    );
+                    useToast({
+                      text1: "Added",
+                      text2: "Card History Added",
+                      type: "success",
+                    });
+                    setRefresh((prev) => !prev);
+                  } catch (error) {
+                    useToast({
+                      text1: "Error",
+                      text2: "User not Updated",
+                      type: "error",
+                    });
+                  }
+                  setPending(false);
+                }}
+              >
+                Add Card Payment Record
+              </Button>
+            </View>
           </View>
         ) : (
           <View className="w-full md:w-1/2">

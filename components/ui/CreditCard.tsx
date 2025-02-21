@@ -27,8 +27,7 @@ const CreditCard = () => {
       <View className="flex flex-1 justify-between">
         <View className="flex flex-row justify-between">
           <View>
-            <Text className="font-medium text-white text-20">Balance</Text>
-            <Text className="font-medium text-white text-32">$ 0</Text>
+            <Text className="font-medium text-white text-20">Metro</Text>
           </View>
           <View className="">
             <View className="bg-white rounded">

@@ -26,6 +26,7 @@ export default function Root({ children }: PropsWithChildren) {
         />
         <meta name="robots" content="index, follow" />
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <link rel="manifest" href="/manifest.json" />
         <meta name="language" content="English"></meta>
         {/*
           Disable body scrolling on web. This makes ScrollView components work closer to how they do on native.

@@ -18,29 +18,12 @@ const cards = () => {
       </View>
       {!user?.cardNumber && (
         <Text className="text-danger font-italics text-16">
-          Add funds to your available balance to start using your banking card
+          You don't have a banking card yet
         </Text>
       )}
       <View className="flex flex-row items-center justify-center">
         <View className="w-[340px]">
-          <Pressable className="flex flex-row items-center p-2 space-x-4  bg-primary rounded-lg">
-            <FontAwesome5 name="plus" size={24} color={colors.white} />
-            <Text className="font-medium text-18 text-white ">Top Up</Text>
-          </Pressable>
-
           <View className="flex flex-row my-2">
-            <View className="w-2/3 pr-1">
-              <Pressable className="flex flex-row items-center p-2 space-x-4  bg-secondary rounded-lg">
-                <MaterialIcons
-                  name="assignment-return"
-                  size={24}
-                  color={colors.white}
-                />
-                <Text className="font-medium text-18 text-white ">
-                  Withdraw
-                </Text>
-              </Pressable>
-            </View>
             <View className="w-1/3">
               <Pressable className="flex flex-row items-center p-2 space-x-4  bg-danger rounded-lg">
                 <FontAwesome name="unlock-alt" size={24} color={colors.white} />
@@ -50,10 +33,6 @@ const cards = () => {
           </View>
         </View>
       </View>
-      <DashboardHeadings>Card Transactions</DashboardHeadings>
-      <Text className="font-regular text-white text-16">
-        No Transanction recorded
-      </Text>
     </View>
   );
 };

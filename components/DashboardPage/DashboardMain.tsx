@@ -65,6 +65,9 @@ const DashboardMain = () => {
     AppContext
   ) as appContextT;
   const [transactions, setTransactions] = useState<transactionT[]>([]);
+  const [cardTransactions, setCardTransactions] = useState<cardTransactionT[]>(
+    []
+  );
   const [transactionAction, setTransactionAction] = useState<
     "release" | "cancel" | undefined
   >(undefined);
@@ -88,6 +91,15 @@ const DashboardMain = () => {
       ])
       .then((res) => {
         setTransactions([...(res.documents as [])]);
+      });
+    database
+      .listDocuments(
+        databaseInfo.id,
+        databaseInfo.collections.cardTransactions,
+        [Query.equal("userId", user.$id)]
+      )
+      .then((res) => {
+        setCardTransactions([...(res.documents as [])]);
       });
   }, [refereshUserInfo]);
   const [viewMore, setViewMore] = useState(false);
@@ -249,204 +261,266 @@ const DashboardMain = () => {
               Send Money
             </Button>
           </View>
-          <Text className="text-secondary font-medium text-24 md:text-32">
-            Transactions
-          </Text>
-          {transactions.length === 0 && (
-            <View className="flex space-x-3 bg-info/20 rounded flex-row items-start border-2 border-info">
-              <View className="bg-info p-2 h-full ">
-                <AntDesign name="infocirlceo" size={24} color={colors.white} />
-              </View>
-              <View className="flex-grow">
-                <Text className="font-medium text-18 text-white">
-                  No Transaction
-                </Text>
-                <Text className="font-regular text-16 text-white">
-                  No Transaction recorded for this account
-                </Text>
-                <View className="flex flex-row justify-end items-center ">
-                  <Text className="text-end text-gray-text">12/07/2024</Text>
-                </View>
-              </View>
+          {cardTransactions.length && (
+            <View>
+              <Text className="text-secondary font-medium text-24 md:text-32">
+                Card Transactions
+              </Text>
+
+              {cardTransactions.length > 0 &&
+                cardTransactions.map((transaction, index) => (
+                  <View
+                    key={index}
+                    className={`flex space-x-3  rounded flex-row items-start border-2 border-info my-2 ${
+                      !transaction.successful
+                        ? "border-danger bg-danger/20"
+                        : "border-success bg-success/20"
+                    }`}
+                  >
+                    <View
+                      className={`${
+                        !transaction.successful ? "bg-danger" : "bg-success"
+                      } p-2 h-full `}
+                    >
+                      <AntDesign
+                        name={
+                          !transaction.successful
+                            ? "closecircleo"
+                            : "checkcircle"
+                        }
+                        size={24}
+                        color={colors.white}
+                      />
+                    </View>
+                    <View className="flex-grow px-1">
+                      <View>
+                        <Text className="font-medium text-18 text-white">
+                          {transaction.successful
+                            ? "Payment Successful"
+                            : "Payment Failed"}
+                        </Text>
+
+                        <Text className="font-regular text-16 text-white">
+                          {transaction.company}
+                        </Text>
+                        <Text className="font-regular text-ellipsis text-16 text-white">
+                          {`- £ ${transaction.amount.toLocaleString()}`}
+                        </Text>
+
+                        <View className="flex flex-row justify-end items-center ">
+                          <Text className="text-end text-gray-text">{`${transaction.date}`}</Text>
+                        </View>
+                      </View>
+                    </View>
+                  </View>
+                ))}
             </View>
           )}
-          {transactions.length > 0 &&
-            transactions.map((transaction, index) => (
-              <View
-                key={index}
-                className={`flex space-x-3  rounded flex-row items-start border-2 border-info ${
-                  transaction.status === "failed"
-                    ? "border-danger bg-danger/20"
-                    : transaction.status === "pending"
-                    ? "border-info bg-info/20"
-                    : "border-success bg-success/20"
-                }`}
-              >
-                <View
-                  className={`${
-                    transaction.status === "failed"
-                      ? "bg-danger"
-                      : transaction.status === "pending"
-                      ? "bg-info"
-                      : "bg-success"
-                  } p-2 h-full `}
-                >
+
+          <View>
+            <Text className="text-secondary font-medium text-24 md:text-32">
+              Transactions
+            </Text>
+            {transactions.length === 0 && (
+              <View className="flex space-x-3 bg-info/20 rounded flex-row items-start border-2 border-info">
+                <View className="bg-info p-2 h-full ">
                   <AntDesign
-                    name={
-                      transaction.status === "failed"
-                        ? "closecircleo"
-                        : transaction.status === "completed"
-                        ? "checkcircle"
-                        : "infocirlceo"
-                    }
+                    name="infocirlceo"
                     size={24}
                     color={colors.white}
                   />
                 </View>
-                <View className="flex-grow px-1">
-                  {(transactionAction === "cancel" ||
-                    transactionAction === "release") &&
-                  transactionActionTarget === transaction.$id ? (
-                    <View>
-                      <Text
-                        className={`font-bold capitalize ${
-                          transactionAction === "release"
-                            ? "text-primary "
-                            : " text-danger"
-                        }  text-18`}
-                      >
-                        {`Sure you want to ${transactionAction}?`}
-                      </Text>
-                      <View className="flex flex-row items-center justify-center">
-                        <View className="w-3/4 space-y-2 py-5">
-                          <Button
-                            color={
-                              transactionAction === "release"
-                                ? "secondary"
-                                : "danger"
-                            }
-                            textColor="white"
-                            pending={pendingUpdateTransaction}
-                            action={() => {
-                              setPendingUpdateTransaction(true);
-                              updateTransaction(
-                                transaction,
-                                user,
-                                transactionAction === "cancel"
-                              )
-                                .then(() => {
-                                  setRefereshUserInfo((prev) => !prev);
-                                  setTransactionAction(undefined);
-                                  setTransactionActionTarget(undefined);
-                                  useToast({
-                                    text1: "Updated!",
-                                    text2:
-                                      "Successfully updated this transaction",
-                                    type: "success",
-                                  });
-                                })
-                                .catch((e) => {
-                                  console.log(e);
-                                  useToast({
-                                    text1: "Updating...",
-                                    text2: "Reaching your bank",
-                                    type: "success",
-                                  });
-                                })
-                                .finally(() => {
-                                  setPendingUpdateTransaction(false);
-                                });
-                            }}
-                          >
-                            Yes
-                          </Button>
-                          <View className=" px-6 lg:px-12">
+                <View className="flex-grow">
+                  <Text className="font-medium text-18 text-white">
+                    No Transaction
+                  </Text>
+                  <Text className="font-regular text-16 text-white">
+                    No Transaction recorded for this account
+                  </Text>
+                  <View className="flex flex-row justify-end items-center ">
+                    <Text className="text-end text-gray-text">12/07/2024</Text>
+                  </View>
+                </View>
+              </View>
+            )}
+            {transactions.length > 0 &&
+              transactions.map((transaction, index) => (
+                <View
+                  key={index}
+                  className={`flex space-x-3  rounded flex-row items-start border-2 border-info my-2 ${
+                    transaction.status === "failed"
+                      ? "border-danger bg-danger/20"
+                      : transaction.status === "pending"
+                      ? "border-info bg-info/20"
+                      : "border-success bg-success/20"
+                  }`}
+                >
+                  <View
+                    className={`${
+                      transaction.status === "failed"
+                        ? "bg-danger"
+                        : transaction.status === "pending"
+                        ? "bg-info"
+                        : "bg-success"
+                    } p-2 h-full `}
+                  >
+                    <AntDesign
+                      name={
+                        transaction.status === "failed"
+                          ? "closecircleo"
+                          : transaction.status === "completed"
+                          ? "checkcircle"
+                          : "infocirlceo"
+                      }
+                      size={24}
+                      color={colors.white}
+                    />
+                  </View>
+                  <View className="flex-grow px-1">
+                    {(transactionAction === "cancel" ||
+                      transactionAction === "release") &&
+                    transactionActionTarget === transaction.$id ? (
+                      <View>
+                        <Text
+                          className={`font-bold capitalize ${
+                            transactionAction === "release"
+                              ? "text-primary "
+                              : " text-danger"
+                          }  text-18`}
+                        >
+                          {`Sure you want to ${transactionAction}?`}
+                        </Text>
+                        <View className="flex flex-row items-center justify-center">
+                          <View className="w-3/4 space-y-2 py-5">
                             <Button
-                              color="secondary"
-                              textColor="secondary"
-                              outlined
+                              color={
+                                transactionAction === "release"
+                                  ? "secondary"
+                                  : "danger"
+                              }
+                              textColor="white"
+                              pending={pendingUpdateTransaction}
                               action={() => {
-                                setTransactionAction(undefined);
-                                setTransactionActionTarget(undefined);
+                                setPendingUpdateTransaction(true);
+                                updateTransaction(
+                                  transaction,
+                                  user,
+                                  transactionAction === "cancel"
+                                )
+                                  .then(() => {
+                                    setRefereshUserInfo((prev) => !prev);
+                                    setTransactionAction(undefined);
+                                    setTransactionActionTarget(undefined);
+                                    useToast({
+                                      text1: "Updated!",
+                                      text2:
+                                        "Successfully updated this transaction",
+                                      type: "success",
+                                    });
+                                  })
+                                  .catch((e) => {
+                                    console.log(e);
+                                    useToast({
+                                      text1: "Updating...",
+                                      text2: "Reaching your bank",
+                                      type: "success",
+                                    });
+                                  })
+                                  .finally(() => {
+                                    setPendingUpdateTransaction(false);
+                                  });
                               }}
                             >
-                              No
+                              Yes
                             </Button>
+                            <View className=" px-6 lg:px-12">
+                              <Button
+                                color="secondary"
+                                textColor="secondary"
+                                outlined
+                                action={() => {
+                                  setTransactionAction(undefined);
+                                  setTransactionActionTarget(undefined);
+                                }}
+                              >
+                                No
+                              </Button>
+                            </View>
                           </View>
                         </View>
                       </View>
-                    </View>
-                  ) : (
-                    <View>
-                      <Text className="font-medium text-18 text-white">
-                        {transaction.sender === user.$id &&
-                        transaction.status === "completed"
-                          ? "Sent Money"
-                          : transaction.sender === user.$id &&
-                            transaction.status === "pending"
-                          ? "Transfer in Progress"
-                          : transaction.sender === user.$id &&
-                            transaction.status === "failed"
-                          ? "Transfer Unsuccesfull"
-                          : transaction.reciever === user.$id &&
-                            transaction.status === "completed"
-                          ? "Received Money"
-                          : transaction.reciever === user.$id &&
-                            transaction.status === "pending"
-                          ? "Incoming Funds"
-                          : "Transfer Reverted"}
-                      </Text>
-                      <Text className="font-regular text-ellipsis text-16 text-white">
-                        {`${transaction.status} transaction`}
-                      </Text>
-                      <Text className="font-regular text-ellipsis text-16 text-white">
-                        {`£ ${transaction.amount.toLocaleString()}`}
-                      </Text>
-                      <Text className="font-regular text-16 text-white">
-                        Purpose: {transaction.purpose}
-                      </Text>
+                    ) : (
+                      <View>
+                        <Text className="font-medium text-18 text-white">
+                          {transaction.sender === user.$id &&
+                          transaction.status === "completed"
+                            ? "Sent Money"
+                            : transaction.sender === user.$id &&
+                              transaction.status === "pending"
+                            ? "Transfer in Progress"
+                            : transaction.sender === user.$id &&
+                              transaction.status === "failed"
+                            ? "Transfer Unsuccesfull"
+                            : transaction.reciever === user.$id &&
+                              transaction.status === "completed"
+                            ? "Received Money"
+                            : transaction.reciever === user.$id &&
+                              transaction.status === "pending"
+                            ? "Incoming Funds"
+                            : "Transfer Reverted"}
+                        </Text>
+                        <Text className="font-regular text-ellipsis text-16 text-white">
+                          {`${transaction.status} transaction`}
+                        </Text>
+                        <Text className="font-regular text-ellipsis text-16 text-white">
+                          {`£ ${transaction.amount.toLocaleString()}`}
+                        </Text>
+                        <Text className="font-regular text-16 text-white">
+                          Purpose: {transaction.purpose}
+                        </Text>
 
-                      <View className="flex flex-row justify-end items-center ">
-                        <Text className="text-end text-gray-text">{`${
-                          transaction.date.split("T")[0]
-                        }`}</Text>
-                      </View>
-                    </View>
-                  )}
-
-                  {transaction.status === "pending" &&
-                    transaction.sender === user.$id &&
-                    user.isAdmin && (
-                      <View className=" flex flex-row py-2 ">
-                        <View className=" w-1/2 px-1">
-                          <Button
-                            color="secondary"
-                            textColor="white"
-                            action={() => {
-                              setTransactionAction("release");
-                              setTransactionActionTarget(transaction.$id);
-                            }}
-                          >
-                            Release
-                          </Button>
-                        </View>
-                        <View className=" w-1/2 px-1">
-                          <Button
-                            color="danger"
-                            textColor="white"
-                            action={() => {
-                              setTransactionAction("cancel");
-                              setTransactionActionTarget(transaction.$id);
-                            }}
-                          >
-                            Cancel
-                          </Button>
+                        <View className="flex flex-row justify-end items-center ">
+                          <Text className="text-end text-gray-text">{`${
+                            transaction.date.split("T")[0]
+                          }`}</Text>
                         </View>
                       </View>
                     )}
+
+                    {transaction.status === "pending" &&
+                      transaction.sender === user.$id &&
+                      user.isAdmin && (
+                        <View className=" flex flex-row py-2 ">
+                          <View className=" w-1/2 px-1">
+                            <Button
+                              color="secondary"
+                              textColor="white"
+                              action={() => {
+                                setTransactionAction("release");
+                                setTransactionActionTarget(transaction.$id);
+                              }}
+                            >
+                              Release
+                            </Button>
+                          </View>
+                          <View className=" w-1/2 px-1">
+                            <Button
+                              color="danger"
+                              textColor="white"
+                              action={() => {
+                                setTransactionAction("cancel");
+                                setTransactionActionTarget(transaction.$id);
+                              }}
+                            >
+                              Cancel
+                            </Button>
+                          </View>
+                        </View>
+                      )}
+                  </View>
                 </View>
-              </View>
-            ))}
+              ))}
+          </View>
         </View>
         <View className="lg:w-1/3 p-4">
           <DashboardSideBar />

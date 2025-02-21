@@ -31,6 +31,14 @@ type transactionT = {
   purpose: string;
   date: string;
 };
+type cardTransactionT = {
+  $id: string;
+  userId: string;
+  amount: number;
+  company: string;
+  date: string;
+  successful?:boolean
+};
 type bankInfoT = {
   phone?: string;
   email: string;
